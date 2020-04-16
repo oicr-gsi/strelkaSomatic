@@ -7,6 +7,7 @@ workflow strelkaSomatic {
 	File normalBam
 	File refFasta
 	File? regionsBed
+	String tmpDir = "/scratch2/users/ibancarz/strelka/workdir"
 	String outputFileNamePrefix = "strelkaSomatic"
     }
     
@@ -24,12 +25,14 @@ workflow strelkaSomatic {
 	normalBam = normalBam,
 	refFasta = refFasta,
 	regionsBed = regionsBed,
+	tmpDir = tmpDir,
 	outputFileNamePrefix = outputFileNamePrefix
     }
 
     call run {
 	input:
 	script = configure.script,
+	tmpDir = tmpDir,
 	outputFileNamePrefix = outputFileNamePrefix
     }
 
@@ -44,8 +47,12 @@ workflow strelkaSomatic {
 	description: "Strelka variant caller in somatic mode"
 	dependencies: [
 	{
-	    name: "strelka/2.9.10",
+	    name: "samtools/1.9",
 	    url: "https://github.com/samtools/samtools"
+	},
+	{
+	    name: "strelka/2.9.10",
+	    url: "https://github.com/Illumina/strelka/releases/tag/v2.9.10"
 	},
 	{
 	    name: "python/2.7",
@@ -63,8 +70,9 @@ task configure {
 	File normalBam
 	File refFasta
 	File? regionsBed
+	String tmpDir
 	String outputFileNamePrefix
-	String modules = "python/2.7 strelka/2.9.10"
+	String modules = "python/2.7 samtools/1.9 strelka/2.9.10"
 	Int jobMemory = 16
 	Int threads = 4
 	Int timeout = 4
@@ -73,12 +81,20 @@ task configure {
     String regionsBedArg = if defined(regionsBed) then "--callRegions ~{regionsBed}" else ""
     
     command <<<
+	set -eo pipefail
+
+	samtools faidx ~{refFasta}
+	samtools index ~{normalBam}
+	samtools index ~{tumorBam}
+
+	rm -rf ~{tmpDir}/*
+
 	configureStrelkaSomaticWorkflow.py \
 	--normalBam ~{normalBam} \
 	--tumorBam ~{tumorBam} \
 	--referenceFasta ~{refFasta} \
 	~{regionsBedArg} \
-	--runDir .
+	--runDir ~{tmpDir}
     >>>
 
     runtime {
@@ -89,7 +105,7 @@ task configure {
     }
 
     output {
-	File script = "runWorkflow.py"
+	File script = "~{tmpDir}/runWorkflow.py"
     }
 }
 
@@ -98,6 +114,7 @@ task run {
     input {
 	File script
 	String outputFileNamePrefix
+	String tmpDir
 	String modules = "python/2.7 strelka/2.9.10"
 	Int jobMemory = 16
 	Int threads = 4
@@ -118,8 +135,8 @@ task run {
     }
 
     output {
-	File snvsVcf = "somatic.snvs.vcf.gz"
-	File indelsVcf = "somatic.indels.vcf.gz"
+	File snvsVcf = "~{tmpDir}/results/variants/somatic.snvs.vcf.gz"
+	File indelsVcf = "~{tmpDir}/results/variants/somatic.indels.vcf.gz"
     }
     
 }
