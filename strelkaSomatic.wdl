@@ -59,25 +59,25 @@ workflow strelkaSomatic {
 task configure {
 
     input {
-	File tumorBam,
-	File normalBam,
-	File refFasta,
-	File? regionsBed,
-	String outputFileNamePrefix,
+	File tumorBam
+	File normalBam
+	File refFasta
+	File? regionsBed
+	String outputFileNamePrefix
 	String modules = "python/2.7 strelka/2.9.10"
 	Int jobMemory = 16
 	Int threads = 4
 	Int timeout = 4
     }
 
-    String regionsBedArg = if regionsBed then "--callRegions ~{regionsBed} \\" else ""
+    String regionsBedArg = if defined(regionsBed) then "--callRegions ~{regionsBed}" else ""
     
     command <<<
 	configureStrelkaSomaticWorkflow.py \
 	--normalBam ~{normalBam} \
 	--tumorBam ~{tumorBam} \
 	--referenceFasta ~{refFasta} \
-	~{regionsBedArg}
+	~{regionsBedArg} \
 	--runDir .
     >>>
 
@@ -97,6 +97,7 @@ task run {
 
     input {
 	File script
+	String outputFileNamePrefix
 	String modules = "python/2.7 strelka/2.9.10"
 	Int jobMemory = 16
 	Int threads = 4
@@ -109,7 +110,7 @@ task run {
 	~{script} -m local -j ~{threads}
     >>>
 
-        runtime {
+    runtime {
 	modules: "~{modules}"
 	memory:  "~{jobMemory} GB"
 	cpu:     "~{threads}"
