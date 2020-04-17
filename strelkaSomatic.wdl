@@ -7,7 +7,6 @@ workflow strelkaSomatic {
 	File normalBam
 	File refFasta
 	File? regionsBed
-	String tmpDir = "/scratch2/users/ibancarz/strelka/workdir"
 	String outputFileNamePrefix = "strelkaSomatic"
     }
     
@@ -19,26 +18,18 @@ workflow strelkaSomatic {
 	outputFileNamePrefix: "Prefix for output files"
     }
 
-    call configure {
+    call configureAndRun {
 	input:
 	tumorBam = tumorBam,
 	normalBam = normalBam,
 	refFasta = refFasta,
 	regionsBed = regionsBed,
-	tmpDir = tmpDir,
-	outputFileNamePrefix = outputFileNamePrefix
-    }
-
-    call run {
-	input:
-	script = configure.script,
-	tmpDir = tmpDir,
 	outputFileNamePrefix = outputFileNamePrefix
     }
 
     output {
-	File snvsVcf = run.snvsVcf
-	File indelsVcf = run.indelsVcf
+	File snvsVcf = configureAndRun.snvsVcf
+	File indelsVcf = configureAndRun.indelsVcf
     }
 
     meta {
@@ -63,14 +54,13 @@ workflow strelkaSomatic {
 
 }
 
-task configure {
+task configureAndRun {
 
     input {
 	File tumorBam
 	File normalBam
 	File refFasta
 	File? regionsBed
-	String tmpDir
 	String outputFileNamePrefix
 	String modules = "python/2.7 samtools/1.9 strelka/2.9.10"
 	Int jobMemory = 16
@@ -87,14 +77,14 @@ task configure {
 	samtools index ~{normalBam}
 	samtools index ~{tumorBam}
 
-	rm -rf ~{tmpDir}/*
-
 	configureStrelkaSomaticWorkflow.py \
 	--normalBam ~{normalBam} \
 	--tumorBam ~{tumorBam} \
 	--referenceFasta ~{refFasta} \
 	~{regionsBedArg} \
-	--runDir ~{tmpDir}
+	--runDir .
+
+	./runWorkflow.py -m local -j ~{threads}
     >>>
 
     runtime {
@@ -105,38 +95,8 @@ task configure {
     }
 
     output {
-	File script = "~{tmpDir}/runWorkflow.py"
+	File snvsVcf = "./results/variants/somatic.snvs.vcf.gz"
+	File indelsVcf = "./results/variants/somatic.indels.vcf.gz"
     }
 }
 
-task run {
-
-    input {
-	File script
-	String outputFileNamePrefix
-	String tmpDir
-	String modules = "python/2.7 strelka/2.9.10"
-	Int jobMemory = 16
-	Int threads = 4
-	Int timeout = 4
-    }
-
-    # TODO will the "-m sge" option work in conjunction with Cromwell?
-    
-    command <<<
-	~{script} -m local -j ~{threads}
-    >>>
-
-    runtime {
-	modules: "~{modules}"
-	memory:  "~{jobMemory} GB"
-	cpu:     "~{threads}"
-	timeout: "~{timeout}"
-    }
-
-    output {
-	File snvsVcf = "~{tmpDir}/results/variants/somatic.snvs.vcf.gz"
-	File indelsVcf = "~{tmpDir}/results/variants/somatic.indels.vcf.gz"
-    }
-    
-}
