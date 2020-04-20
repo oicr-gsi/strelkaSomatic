@@ -133,7 +133,11 @@ task configureAndRun {
 	}
     }
 
-    String regionsBedArg = if defined(regionsBed) then "--callRegions ~{regionsBed}" else ""
+    String bedGrep = if defined(regionsBed) then "grep -v \"^@\" ~{regionsBed} | bgzip > regions.bed.gz" else ""
+    #String regionsBedArg = if defined(regionsBed) then "--callRegions regions.bed" else ""
+    String regionsBedArg = if defined(regionsBed) then "--callRegions regions.bed.gz" else ""
+    #String indexFeatureFile = if defined(regionsBed) then "gatk --java-options \"-Xmx~{jobMemory}g\" IndexFeatureFile -F regions.bed" else ""
+    String indexFeatureFile = if defined(regionsBed) then "tabix regions.bed.gz" else ""
     
     command <<<
 	set -eo pipefail
@@ -141,6 +145,8 @@ task configureAndRun {
 	samtools faidx ~{refFasta}
 	samtools index ~{normalBam}
 	samtools index ~{tumorBam}
+	~{bedGrep}
+	~{indexFeatureFile}
 
 	configureStrelkaSomaticWorkflow.py \
 	--normalBam ~{normalBam} \
@@ -194,16 +200,22 @@ task splitIntervals {
 	}
     }
 
+    String scatterArg = if defined(scatterCount) then "--scatter-count ~{scatterCount}" else ""
+
     command <<<
+	set -eo pipefail
+
 	mkdir interval-files
-	cp ~{refFai} .
-	cp ~{refDict} .
+	ln -s ~{refFai}
+	ln -s ~{refDict}
 	gatk --java-options "-Xmx~{memory}g" SplitIntervals \
 	-R ~{refFasta} \
 	~{"-L " + intervals} \
-	--scatter-count ~{scatterCount} \
+	~{scatterArg} \
 	-O interval-files \
-	~{splitIntervalsExtraArgs}    cp interval-files/*.interval_list .
+	~{splitIntervalsExtraArgs}
+
+	cp interval-files/*.interval_list .
     >>>
 
     output {
@@ -215,9 +227,9 @@ task vcfGather {
     # TODO do not use hard-coded genome reference module name
     input {
 	String modules = "gatk/4.1.2.0 hg19/p13"
-	String gatk = "$GATK_ROOT/gatk"
+	String gatk = "$GATK_ROOT/bin/gatk"
 	String refFasta = "$HG19_ROOT/hg19_random.fa"
-	Array[File?] vcfs
+	Array[File] vcfs
 	String variantType
 	Int memory = 32
 	Int timeout = 72
@@ -240,12 +252,15 @@ task vcfGather {
 	}
     }
 
-    String outputPrefix = basename(select_first([vcfs[0], ""]), ".vcf")
-    String outputName = "~{outputPrefix}.~{variantType}.vcf"
+    #String outputPrefix = basename(select_first([vcfs[0], ""]), ".vcf")
+    String outputPrefix = basename(vcfs[0], ".vcf.gz")
+    String outputName = "~{outputPrefix}.vcf"
 
     command <<<
+	set -eo pipefail
+
 	~{gatk} GatherVcfs \
-	-I ~{sep="-I " vcfs}
+	-I ~{sep=" -I " vcfs} \
 	-O ~{outputName}
     >>>
 
