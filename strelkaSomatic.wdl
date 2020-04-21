@@ -68,8 +68,6 @@ workflow strelkaSomatic {
 	    }
 	}
 
-	# TODO should we concatenate and output the TSV and XML stats files?
-
 	call vcfGather as snvsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.snvsVcf,
@@ -93,6 +91,7 @@ workflow strelkaSomatic {
 	}
     }
 
+    # Do not output the TSV and XML stats files; contents not needed
     output {
 	File snvsVcf = select_first([snvsVcfGather.result, configureAndRunSingle.snvsVcf])
 	File indelsVcf = select_first([indelsVcfGather.result, configureAndRunSingle.indelsVcf])
@@ -133,19 +132,18 @@ task configureAndRun {
 	}
     }
 
-    String bedGrep = if defined(regionsBed) then "grep -v \"^@\" ~{regionsBed} | bgzip > regions.bed.gz" else ""
-    #String regionsBedArg = if defined(regionsBed) then "--callRegions regions.bed" else ""
-    String regionsBedArg = if defined(regionsBed) then "--callRegions regions.bed.gz" else ""
-    #String indexFeatureFile = if defined(regionsBed) then "gatk --java-options \"-Xmx~{jobMemory}g\" IndexFeatureFile -F regions.bed" else ""
-    String indexFeatureFile = if defined(regionsBed) then "tabix regions.bed.gz" else ""
-    
+    String bedName = "regions.bed.gz"
+    String writeBed = if defined(regionsBed) then "grep -v \"^@\" ~{regionsBed} | bgzip > ~{bedName}" else ""
+    String indexFeatureFile = if defined(regionsBed) then "tabix ~{bedName}" else ""
+    String regionsBedArg = if defined(regionsBed) then "--callRegions ~{bedName}" else ""
+
     command <<<
 	set -eo pipefail
 
 	samtools faidx ~{refFasta}
 	samtools index ~{normalBam}
 	samtools index ~{tumorBam}
-	~{bedGrep}
+	~{writeBed}
 	~{indexFeatureFile}
 
 	configureStrelkaSomaticWorkflow.py \
@@ -252,7 +250,6 @@ task vcfGather {
 	}
     }
 
-    #String outputPrefix = basename(select_first([vcfs[0], ""]), ".vcf")
     String outputPrefix = basename(vcfs[0], ".vcf.gz")
     String outputName = "~{outputPrefix}.vcf"
 
@@ -262,6 +259,8 @@ task vcfGather {
 	~{gatk} GatherVcfs \
 	-I ~{sep=" -I " vcfs} \
 	-O ~{outputName}
+
+	gzip ~{outputName}
     >>>
 
     runtime {
@@ -271,6 +270,6 @@ task vcfGather {
     }
 
     output {
-	File result = "~{outputName}"
+	File result = "~{outputName}.gz"
     }
 }
