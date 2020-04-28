@@ -74,12 +74,10 @@ workflow strelkaSomatic {
 	call vcfGather as snvsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.snvsVcf,
-	    variantType = "snvs"
 	}
 	call vcfGather as indelsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.indelsVcf,
-	    variantType = "indels"
 	}
     }
 
@@ -139,9 +137,12 @@ task configureAndRun {
     }
 
     String bedName = "regions.bed.gz"
+    # remove header from the .bed file and compress, for compatibility with Strelka
     String writeBed = if defined(regionsBed) then "grep -v \"^@\" ~{regionsBed} | bgzip > ~{bedName}" else ""
     String indexFeatureFile = if defined(regionsBed) then "tabix ~{bedName}" else ""
     String regionsBedArg = if defined(regionsBed) then "--callRegions ~{bedName}" else ""
+
+    # refIndex is not explicitly used, but needed by configureStrelkaSomaticWorkflow.py
 
     command <<<
 	set -eo pipefail
@@ -185,7 +186,7 @@ task splitIntervals {
 	Int? scatterCount
 	String? splitIntervalsExtraArgs
 	Int memory = 16
-	Int timeout = 72
+	Int timeout = 4
     }
 
     parameter_meta {
@@ -229,15 +230,13 @@ task splitIntervals {
 }
 
 task vcfGather {
-    # TODO do not use hard-coded genome reference module name
+
     input {
-	String modules = "gatk/4.1.2.0 hg19/p13"
+	String modules = "gatk/4.1.2.0"
 	String gatk = "$GATK_ROOT/bin/gatk"
-	String refFasta = "$HG19_ROOT/hg19_random.fa"
 	Array[File] vcfs
-	String variantType
-	Int memory = 32
-	Int timeout = 72
+	Int memory = 16
+	Int timeout = 12
     }
 
     parameter_meta {
