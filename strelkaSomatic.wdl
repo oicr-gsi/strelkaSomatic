@@ -6,6 +6,7 @@ workflow strelkaSomatic {
 	File tumorBam
 	File normalBam
 	File refFasta
+	File refIndex
 	File? bedFile
 	Int? numChunk
 	String outputFileNamePrefix = "strelkaSomatic"
@@ -15,6 +16,7 @@ workflow strelkaSomatic {
 	tumorBam: "Input BAM file with tumor data"
 	normalBam: "Input BAM file with normal data"
 	refFasta: "Reference FASTA file"
+	refIndex: "Reference FAI index"
 	bedFile: "BED file designating regions to process"
 	numChunk: "If BED file given, number of chunks in which to split each chromosome"
 	outputFileNamePrefix: "Prefix for output files"
@@ -39,7 +41,7 @@ workflow strelkaSomatic {
 	    url: "https://www.python.org/downloads/release/python-2716/"
 	},
 	{
-	    name: "gatk/4.1.1.0",
+	    name: "gatk/4.1.6.0",
 	    url: "https://software.broadinstitute.org/gatk/download/index"
 	}
 	]
@@ -63,6 +65,7 @@ workflow strelkaSomatic {
 		tumorBam = tumorBam,
 		normalBam = normalBam,
 		refFasta = refFasta,
+		refIndex = refIndex,
 		regionsBed = interval,
 		outputFileNamePrefix = outputFileNamePrefix
 	    }
@@ -87,6 +90,7 @@ workflow strelkaSomatic {
 	    tumorBam = tumorBam,
 	    normalBam = normalBam,
 	    refFasta = refFasta,
+	    refIndex = refIndex,
 	    outputFileNamePrefix = outputFileNamePrefix
 	}
     }
@@ -106,6 +110,7 @@ task configureAndRun {
 	File tumorBam
 	File normalBam
 	File refFasta
+	File refIndex
 	File? regionsBed
 	String outputFileNamePrefix
 	String modules = "python/2.7 samtools/1.9 strelka/2.9.10"
@@ -118,6 +123,7 @@ task configureAndRun {
 	tumorBam: "BAM file with aligned reads from tumor sample"
 	normalBam: "BAM file with aligned reads from normal sample"
 	refFasta: "FASTA reference file"
+	refIndex: "FAI reference index file"
 	regionsBed: "BED file designating regions to process"
 	modules: "Environment module names and version to load (space separated) before command execution"
 	jobMemory: "Memory allocated for job"
@@ -140,7 +146,6 @@ task configureAndRun {
     command <<<
 	set -eo pipefail
 
-	samtools faidx ~{refFasta}
 	samtools index ~{normalBam}
 	samtools index ~{tumorBam}
 	~{writeBed}
@@ -198,6 +203,7 @@ task splitIntervals {
 	}
     }
 
+    String intervalsArg = if defined(intervals) then "-L ${intervals }" else ""
     String scatterArg = if defined(scatterCount) then "--scatter-count ~{scatterCount}" else ""
 
     command <<<
@@ -208,8 +214,9 @@ task splitIntervals {
 	ln -s ~{refDict}
 	gatk --java-options "-Xmx~{memory}g" SplitIntervals \
 	-R ~{refFasta} \
-	~{"-L " + intervals} \
+	~{intervalsArg} \
 	~{scatterArg} \
+	--subdivision-mode BALANCING_WITHOUT_INTERVAL_SUBDIVISION \
 	-O interval-files \
 	~{splitIntervalsExtraArgs}
 
