@@ -192,8 +192,11 @@ task splitIntervals {
     parameter_meta {
 	modules: "Environment module names and version to load (space separated) before command execution"
 	refFasta: "Path to the reference fasta"
+	refFai: "Path to the reference .fai index"
+	refDict: "Path to the reference .dict dictionary"
 	intervals: "Interval file to split for scattering"
 	scatterCount: "Number of files to split the interval file into"
+	splitIntervalsExtraArgs: "Additional arguments for the 'gatk SplitIntervals' command"
 	memory: "Memory allocated for job"
 	timeout: "Hours before task timeout"
     }
