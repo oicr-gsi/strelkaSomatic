@@ -1,14 +1,16 @@
 
 {
   "defaults": {
-    "description": "Strelka somatic workflow test",
-    "output_metrics_dir": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation",
-    "parameters": {
+      "description": "Strelka somatic workflow test",
+      "metrics_calculate": "calculate.sh",
+      "metrics_compare": "compare.sh",
+      "output_metrics_dir": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation",
+      "parameters": {
           "wdl_options": {
-            "write_to_cache": false,
-            "read_from_cache": false
-           }
-         }
+              "write_to_cache": false,
+              "read_from_cache": false
+          }
+      }
   },
     "tests": [
 	{
