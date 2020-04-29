@@ -17,7 +17,7 @@
     <properties>
         <workflow-description>Workflow to run the Strelka somatic variant caller.</workflow-description>
 	<wdl-workflow>strelkaSomatic.wdl</wdl-workflow>
-	<test-basedir>tests/</test-basedir>
+	<test-basedir>test/</test-basedir>
     </properties>
 
 </project>
