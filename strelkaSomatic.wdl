@@ -186,8 +186,8 @@ task splitIntervals {
 	File? intervals
 	Int? scatterCount
 	String? splitIntervalsExtraArgs
-	Int memory = 16
-	Int timeout = 4
+	Int memory = 32
+	Int timeout = 72
     }
 
     parameter_meta {
