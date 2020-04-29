@@ -182,6 +182,7 @@ task splitIntervals {
 	String refFasta = "$HG19_ROOT/hg19_random.fa"
 	String refFai = "$HG19_ROOT/hg19_random.fa.fai"
 	String refDict = "$HG19_ROOT/hg19_random.dict"
+	String gatk = "$GATK_ROOT/bin/gatk"
 	File? intervals
 	Int? scatterCount
 	String? splitIntervalsExtraArgs
@@ -194,6 +195,7 @@ task splitIntervals {
 	refFasta: "Path to the reference fasta"
 	refFai: "Path to the reference .fai index"
 	refDict: "Path to the reference .dict dictionary"
+	gatk: "GATK executable path"
 	intervals: "Interval file to split for scattering"
 	scatterCount: "Number of files to split the interval file into"
 	splitIntervalsExtraArgs: "Additional arguments for the 'gatk SplitIntervals' command"
@@ -207,7 +209,6 @@ task splitIntervals {
 	}
     }
 
-    String gatk = "$GATK_ROOT/bin/gatk"
     String intervalsArg = if defined(intervals) then "-L ${intervals }" else ""
     String scatterArg = if defined(scatterCount) then "--scatter-count ~{scatterCount}" else ""
 
