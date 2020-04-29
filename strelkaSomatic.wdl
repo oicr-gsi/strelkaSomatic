@@ -207,6 +207,7 @@ task splitIntervals {
 	}
     }
 
+    String gatk = "$GATK_ROOT/bin/gatk"
     String intervalsArg = if defined(intervals) then "-L ${intervals }" else ""
     String scatterArg = if defined(scatterCount) then "--scatter-count ~{scatterCount}" else ""
 
@@ -216,7 +217,7 @@ task splitIntervals {
 	mkdir interval-files
 	ln -s ~{refFai}
 	ln -s ~{refDict}
-	gatk --java-options "-Xmx~{memory}g" SplitIntervals \
+	~{gatk} --java-options "-Xmx~{memory}g" SplitIntervals \
 	-R ~{refFasta} \
 	~{intervalsArg} \
 	~{scatterArg} \
