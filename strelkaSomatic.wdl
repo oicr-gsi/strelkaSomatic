@@ -229,6 +229,12 @@ task splitIntervals {
 	cp interval-files/*.interval_list .
     >>>
 
+    runtime {
+	memory:  "~{memory} GB"
+	modules: "~{modules}"
+	timeout: "~{timeout}"
+    }
+
     output {
 	Array[File] intervalFiles = glob("*.interval_list")
     }
