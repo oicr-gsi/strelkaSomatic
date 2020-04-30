@@ -219,7 +219,7 @@ task splitIntervals {
 	mkdir interval-files
 	ln -s ~{refFai}
 	ln -s ~{refDict}
-	~{gatk} --java-options "-Xmx~{javaMemory}g" SplitIntervals \
+	~{gatk} --java-options "-Xmx~{memory-8}g" SplitIntervals \
 	-R ~{refFasta} \
 	~{intervalsArg} \
 	~{scatterArg} \
