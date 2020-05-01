@@ -5,5 +5,5 @@ set -o pipefail
 
 cd $1
 
-md5sum somatic.indels.vcf.gz somatic.snvs.vcf.gz > strelka_somatic_test.metrics
+md5sum somatic.indels.vcf.gz somatic.snvs.vcf.gz
 
