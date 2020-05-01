@@ -5,5 +5,5 @@ set -o pipefail
 
 cd $1
 
-md5sum somatic.indels.vcf.gz somatic.snvs.vcf.gz
-
+zcat somatic.indels.vcf.gz | egrep -v "^##(cmdline|fileDate|reference|startTime)" | md5sum
+zcat somatic.snvs.vcf.gz | egrep -v "^##(cmdline|fileDate|reference|startTime)" | md5sum
