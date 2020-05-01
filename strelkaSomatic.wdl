@@ -7,6 +7,7 @@ workflow strelkaSomatic {
 	File normalBam
 	File refFasta
 	File refIndex
+	File refDict
 	File? bedFile
 	Int? numChunk
 	String outputFileNamePrefix = "strelkaSomatic"
@@ -17,6 +18,7 @@ workflow strelkaSomatic {
 	normalBam: "Input BAM file with normal data"
 	refFasta: "Reference FASTA file"
 	refIndex: "Reference FAI index"
+	refDict: "Reference DICT file"
 	bedFile: "BED file designating regions to process"
 	numChunk: "If BED file given, number of chunks in which to split each chromosome"
 	outputFileNamePrefix: "Prefix for output files"
@@ -49,17 +51,16 @@ workflow strelkaSomatic {
 
     # Interval file provided, perform scatter/gather
     if(defined(bedFile)) {
-
 	call splitIntervals {
 	    input:
+	    refFasta = refFasta,
+	    refFai = refIndex,
+	    refDict = refDict,
             intervals = bedFile,
             scatterCount = numChunk
 	}
-
 	Array[File] intervals = splitIntervals.intervalFiles
-
 	scatter(interval in intervals) {
-
 	    call configureAndRun as configureAndRunParallel {
 		input:
 		tumorBam = tumorBam,
@@ -70,7 +71,6 @@ workflow strelkaSomatic {
 		outputFileNamePrefix = outputFileNamePrefix
 	    }
 	}
-
 	call vcfGather as snvsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.snvsVcf,
@@ -80,9 +80,8 @@ workflow strelkaSomatic {
 	    vcfs = configureAndRunParallel.indelsVcf,
 	}
     }
-
+    # No interval file, run as single process
     if(!defined(bedFile)) {
-
 	call configureAndRun as configureAndRunSingle {
 	    input:
 	    tumorBam = tumorBam,
@@ -98,8 +97,6 @@ workflow strelkaSomatic {
 	File snvsVcf = select_first([snvsVcfGather.result, configureAndRunSingle.snvsVcf])
 	File indelsVcf = select_first([indelsVcfGather.result, configureAndRunSingle.indelsVcf])
     }
-
-
 }
 
 task configureAndRun {
@@ -178,14 +175,14 @@ task configureAndRun {
 task splitIntervals {
 
     input {
-	String modules = "gatk/4.1.2.0 hg19/p13"
-	String refFasta = "$HG19_ROOT/hg19_random.fa"
-	String refFai = "$HG19_ROOT/hg19_random.fa.fai"
-	String refDict = "$HG19_ROOT/hg19_random.dict"
+	String refFasta
+	String refFai
+	String refDict
 	String gatk = "$GATK_ROOT/bin/gatk"
 	File? intervals
 	Int? scatterCount
 	String? splitIntervalsExtraArgs
+	String modules = "gatk/4.1.2.0 hg19/p13"
 	Int memory = 32
 	Int timeout = 72
     }
@@ -211,7 +208,6 @@ task splitIntervals {
 
     String intervalsArg = if defined(intervals) then "-L ${intervals }" else ""
     String scatterArg = if defined(scatterCount) then "--scatter-count ~{scatterCount}" else ""
-    Int javaMemory = memory - 4
 
     command <<<
 	set -eo pipefail
