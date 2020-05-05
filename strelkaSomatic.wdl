@@ -121,7 +121,7 @@ task configureAndRun {
 	File normalBai
 	File refFasta
 	File refIndex
-	File refModule
+	String refModule
 	File? regionsBed
 	String outputFileNamePrefix
 	String nonRefModules = "python/2.7 samtools/1.9 strelka/2.9.10"
