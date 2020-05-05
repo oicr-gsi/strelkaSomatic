@@ -4,7 +4,9 @@ workflow strelkaSomatic {
 
     input {
 	File tumorBam
+	File tumorBai
 	File normalBam
+	File normalBai
 	File refFasta
 	File refIndex
 	File refDict
@@ -15,7 +17,9 @@ workflow strelkaSomatic {
     
     parameter_meta {
 	tumorBam: "Input BAM file with tumor data"
+	tumorBai: "BAM index file for tumor data"
 	normalBam: "Input BAM file with normal data"
+	normalBai: "BAM index file for normal data"
 	refFasta: "Reference FASTA file"
 	refIndex: "Reference FAI index"
 	refDict: "Reference DICT file"
@@ -64,7 +68,9 @@ workflow strelkaSomatic {
 	    call configureAndRun as configureAndRunParallel {
 		input:
 		tumorBam = tumorBam,
+		tumorBai = tumorBai,
 		normalBam = normalBam,
+		normalBai = normalBai,
 		refFasta = refFasta,
 		refIndex = refIndex,
 		regionsBed = interval,
@@ -85,7 +91,9 @@ workflow strelkaSomatic {
 	call configureAndRun as configureAndRunSingle {
 	    input:
 	    tumorBam = tumorBam,
+	    tumorBai = tumorBai,
 	    normalBam = normalBam,
+	    normalBai = normalBai,
 	    refFasta = refFasta,
 	    refIndex = refIndex,
 	    outputFileNamePrefix = outputFileNamePrefix
@@ -103,7 +111,9 @@ task configureAndRun {
 
     input {
 	File tumorBam
+	File tumorBai
 	File normalBam
+	File normalBai
 	File refFasta
 	File refIndex
 	File? regionsBed
@@ -116,7 +126,9 @@ task configureAndRun {
 
     parameter_meta {
 	tumorBam: "BAM file with aligned reads from tumor sample"
+	tumorBai: "BAM index file for tumor data"
 	normalBam: "BAM file with aligned reads from normal sample"
+	normalBai: "BAM index file for normal data"
 	refFasta: "FASTA reference file"
 	refIndex: "FAI reference index file"
 	regionsBed: "BED file designating regions to process"
@@ -139,13 +151,12 @@ task configureAndRun {
     String indexFeatureFile = if defined(regionsBed) then "tabix ~{bedName}" else ""
     String regionsBedArg = if defined(regionsBed) then "--callRegions ~{bedName}" else ""
 
-    # refIndex is not explicitly used, but needed by configureStrelkaSomaticWorkflow.py
+    # index files not explicitly used, but needed by configureStrelkaSomaticWorkflow.py
+    # ie. tumorBai, normalBai, refIndex; tabix output on bedfile (if any)
 
     command <<<
 	set -eo pipefail
 
-	samtools index ~{normalBam}
-	samtools index ~{tumorBam}
 	~{writeBed}
 	~{indexFeatureFile}
 
