@@ -10,6 +10,7 @@ workflow strelkaSomatic {
 	File refFasta
 	File refIndex
 	File refDict
+	String refModule
 	File? bedFile
 	Int? numChunk
 	String outputFileNamePrefix = "strelkaSomatic"
@@ -22,6 +23,7 @@ workflow strelkaSomatic {
 	normalBai: "BAM index file for normal data"
 	refFasta: "Reference FASTA file"
 	refIndex: "Reference FAI index"
+	refModule: "Name of genome reference environment module"
 	refDict: "Reference DICT file"
 	bedFile: "BED file designating regions to process"
 	numChunk: "If BED file given, number of chunks in which to split each chromosome"
@@ -60,6 +62,7 @@ workflow strelkaSomatic {
 	    refFasta = refFasta,
 	    refFai = refIndex,
 	    refDict = refDict,
+	    refModule = refModule,
             intervals = bedFile,
             scatterCount = numChunk
 	}
@@ -73,6 +76,7 @@ workflow strelkaSomatic {
 		normalBai = normalBai,
 		refFasta = refFasta,
 		refIndex = refIndex,
+		refModule = refModule,
 		regionsBed = interval,
 		outputFileNamePrefix = outputFileNamePrefix
 	    }
@@ -96,6 +100,7 @@ workflow strelkaSomatic {
 	    normalBai = normalBai,
 	    refFasta = refFasta,
 	    refIndex = refIndex,
+	    refModule = refModule,
 	    outputFileNamePrefix = outputFileNamePrefix
 	}
     }
@@ -116,9 +121,10 @@ task configureAndRun {
 	File normalBai
 	File refFasta
 	File refIndex
+	File refModule
 	File? regionsBed
 	String outputFileNamePrefix
-	String modules = "python/2.7 samtools/1.9 strelka/2.9.10"
+	String nonRefModules = "python/2.7 samtools/1.9 strelka/2.9.10"
 	Int jobMemory = 16
 	Int threads = 4
 	Int timeout = 4
@@ -131,8 +137,9 @@ task configureAndRun {
 	normalBai: "BAM index file for normal data"
 	refFasta: "FASTA reference file"
 	refIndex: "FAI reference index file"
+	refModule: "Genome reference module name"
 	regionsBed: "BED file designating regions to process"
-	modules: "Environment module names and version to load (space separated) before command execution"
+	nonRefModules: "Environment module names other than genome reference"
 	jobMemory: "Memory allocated for job"
 	timeout: "Hours before task timeout"
 	threads: "Number of threads for processing"
@@ -145,6 +152,7 @@ task configureAndRun {
 	}
     }
 
+    String modules = "~{refModule} ~{nonRefModules}"
     String bedName = "regions.bed.gz"
     # remove header from the .bed file and compress, for compatibility with Strelka
     String writeBed = if defined(regionsBed) then "grep -v \"^@\" ~{regionsBed} | bgzip > ~{bedName}" else ""
@@ -189,26 +197,28 @@ task splitIntervals {
 	String refFasta
 	String refFai
 	String refDict
+	String refModule
 	String gatk = "$GATK_ROOT/bin/gatk"
 	File? intervals
 	Int? scatterCount
 	String? splitIntervalsExtraArgs
-	String modules = "gatk/4.1.2.0 hg19/p13"
+	String nonRefModules = "gatk/4.1.2.0"
 	Int memory = 32
 	Int timeout = 72
     }
 
     parameter_meta {
-	modules: "Environment module names and version to load (space separated) before command execution"
 	refFasta: "Path to the reference fasta"
 	refFai: "Path to the reference .fai index"
 	refDict: "Path to the reference .dict dictionary"
+	refModule: "Genome reference module"
 	gatk: "GATK executable path"
 	intervals: "Interval file to split for scattering"
 	scatterCount: "Number of files to split the interval file into"
 	splitIntervalsExtraArgs: "Additional arguments for the 'gatk SplitIntervals' command"
 	memory: "Memory allocated for job"
 	timeout: "Hours before task timeout"
+	nonRefModules: "Environment modules other than the genome refence"
     }
 
     meta {
@@ -217,6 +227,7 @@ task splitIntervals {
 	}
     }
 
+    String modules = "~{refModule} ~{nonRefModules}"
     String intervalsArg = if defined(intervals) then "-L ${intervals }" else ""
     String scatterArg = if defined(scatterCount) then "--scatter-count ~{scatterCount}" else ""
 
