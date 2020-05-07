@@ -7,14 +7,18 @@ workflow strelkaSomatic {
 	File tumorBai
 	File normalBam
 	File normalBai
-	File refFasta
-	File refIndex
-	File refDict
+	String refFasta
+	String refIndex
+	String refDict
 	String refModule
 	File? bedFile
 	Int? numChunk
 	String outputFileNamePrefix = "strelkaSomatic"
     }
+
+    # store genome references as String, not File
+    # allows correct interpolation of environment variables
+    # Eg. for "strelkaSomatic.refDict": "$HG38_ROOT/hg38_random.dict"
     
     parameter_meta {
 	tumorBam: "Input BAM file with tumor data"
@@ -119,8 +123,8 @@ task configureAndRun {
 	File tumorBai
 	File normalBam
 	File normalBai
-	File refFasta
-	File refIndex
+	String refFasta
+	String refIndex
 	String refModule
 	File? regionsBed
 	String outputFileNamePrefix
