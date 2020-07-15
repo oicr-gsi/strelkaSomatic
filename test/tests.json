@@ -1,0 +1,34 @@
+
+{
+  "defaults": {
+      "description": "Strelka somatic workflow test",
+      "metrics_calculate": "calculate.sh",
+      "metrics_compare": "compare.sh",
+      "output_metrics_dir": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation",
+      "parameters": {
+          "wdl_options": {
+              "write_to_cache": false,
+              "read_from_cache": false
+          }
+      }
+  },
+    "tests": [
+	{
+	    "id": "strelka_somatic_test",
+	    "parameters": {
+		"wdl_inputs": {
+		    "strelkaSomatic.refFasta": "/.mounts/labs/resit/modulator/sw/data/hg19-p13/hg19_random.fa",
+		    "strelkaSomatic.refIndex": "/.mounts/labs/resit/modulator/sw/data/hg19-p13/hg19_random.fa.fai",
+		    "strelkaSomatic.refDict": "/.mounts/labs/resit/modulator/sw/data/hg19-p13/hg19_random.dict",
+		    "strelkaSomatic.refModule": "hg19/p13",
+		    "strelkaSomatic.tumorBam": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam",
+		    "strelkaSomatic.tumorBai": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam.bai",
+		    "strelkaSomatic.normalBam": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam",
+		    "strelkaSomatic.normalBai": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam.bai",
+		    "strelkaSomatic.bedFile": "/.mounts/labs/resit/modulator/sw/data/hg19-p13/hg19.chrom.sizes.bed",
+		    "strelkaSomatic.numChunk": 4
+		}
+	    }
+	}
+    ]
+}
