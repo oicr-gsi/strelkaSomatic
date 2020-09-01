@@ -53,6 +53,10 @@ workflow strelkaSomatic {
 	    url: "https://www.python.org/downloads/release/python-2716/"
 	},
 	{
+	    name: "python/3.7",
+	    url: "https://www.python.org/downloads/release/python-378/"
+	},
+	{
 	    name: "gatk/4.1.6.0",
 	    url: "https://software.broadinstitute.org/gatk/download/index"
 	}
