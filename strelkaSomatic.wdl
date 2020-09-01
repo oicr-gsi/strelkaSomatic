@@ -75,7 +75,7 @@ workflow strelkaSomatic {
 	    input:
 	    intervalFiles = intervals
 	}
-	Array[file] bedIntervals = convertIntervalsToBed.bedFiles
+	Array[File] bedIntervals = convertIntervalsToBed.bedFiles
 	scatter(interval in bedIntervals) {
 	    call configureAndRun as configureAndRunParallel {
 		input:
