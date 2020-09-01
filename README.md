@@ -25,9 +25,13 @@ java -jar cromwell.jar run strelkaSomatic.wdl --inputs inputs.json
 Parameter|Value|Description
 ---|---|---
 `tumorBam`|File|Input BAM file with tumor data
+`tumorBai`|File|BAM index file for tumor data
 `normalBam`|File|Input BAM file with normal data
-`refFasta`|File|Reference FASTA file
-`refIndex`|File|Reference FAI index
+`normalBai`|File|BAM index file for normal data
+`refFasta`|String|Reference FASTA file
+`refIndex`|String|Reference FAI index
+`refDict`|String|Reference DICT file
+`refModule`|String|Name of genome reference environment module
 
 
 #### Optional workflow parameters:
@@ -41,14 +45,15 @@ Parameter|Value|Default|Description
 #### Optional task parameters:
 Parameter|Value|Default|Description
 ---|---|---|---
-`splitIntervals.modules`|String|"gatk/4.1.2.0 hg19/p13"|Environment module names and version to load (space separated) before command execution
-`splitIntervals.refFasta`|String|"$HG19_ROOT/hg19_random.fa"|Path to the reference fasta
-`splitIntervals.refFai`|String|"$HG19_ROOT/hg19_random.fa.fai"|Path to the reference .fai index
-`splitIntervals.refDict`|String|"$HG19_ROOT/hg19_random.dict"|Path to the reference .dict dictionary
+`splitIntervals.gatk`|String|"$GATK_ROOT/bin/gatk"|GATK executable path
 `splitIntervals.splitIntervalsExtraArgs`|String?|None|Additional arguments for the 'gatk SplitIntervals' command
-`splitIntervals.memory`|Int|16|Memory allocated for job
-`splitIntervals.timeout`|Int|4|Hours before task timeout
-`configureAndRunParallel.modules`|String|"python/2.7 samtools/1.9 strelka/2.9.10"|Environment module names and version to load (space separated) before command execution
+`splitIntervals.nonRefModules`|String|"gatk/4.1.2.0"|Environment modules other than the genome refence
+`splitIntervals.memory`|Int|32|Memory allocated for job
+`splitIntervals.timeout`|Int|72|Hours before task timeout
+`convertIntervalsToBed.modules`|String|"python/3.7"|Environment modules
+`convertIntervalsToBed.memory`|Int|16|Memory allocated for job
+`convertIntervalsToBed.timeout`|Int|4|Hours before task timeout
+`configureAndRunParallel.nonRefModules`|String|"python/2.7 samtools/1.9 strelka/2.9.10"|Environment module names other than genome reference
 `configureAndRunParallel.jobMemory`|Int|16|Memory allocated for job
 `configureAndRunParallel.threads`|Int|4|Number of threads for processing
 `configureAndRunParallel.timeout`|Int|4|Hours before task timeout
@@ -61,7 +66,7 @@ Parameter|Value|Default|Description
 `indelsVcfGather.memory`|Int|16|Memory allocated for job
 `indelsVcfGather.timeout`|Int|12|Hours before task timeout
 `configureAndRunSingle.regionsBed`|File?|None|BED file designating regions to process
-`configureAndRunSingle.modules`|String|"python/2.7 samtools/1.9 strelka/2.9.10"|Environment module names and version to load (space separated) before command execution
+`configureAndRunSingle.nonRefModules`|String|"python/2.7 samtools/1.9 strelka/2.9.10"|Environment module names other than genome reference
 `configureAndRunSingle.jobMemory`|Int|16|Memory allocated for job
 `configureAndRunSingle.threads`|Int|4|Number of threads for processing
 `configureAndRunSingle.timeout`|Int|4|Hours before task timeout
@@ -71,8 +76,8 @@ Parameter|Value|Default|Description
 
 Output | Type | Description
 ---|---|---
-`snvsVcf`|File|None
-`indelsVcf`|File|None
+`snvsVcf`|File|VCF file with SNVs, .gz compressed
+`indelsVcf`|File|VCF file with indels, .gz compressed
 
 
 ## Niassa + Cromwell
