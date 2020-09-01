@@ -56,7 +56,7 @@ workflow strelkaSomatic {
 	    name: "gatk/4.1.6.0",
 	    url: "https://software.broadinstitute.org/gatk/download/index"
 	}
-	],
+	]
 	output_meta: {
 	    snvsVcf: "VCF file with SNVs, .gz compressed",
 	    indelsVcf: "VCF file with indels, .gz compressed"
