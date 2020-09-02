@@ -53,10 +53,18 @@ workflow strelkaSomatic {
 	    url: "https://www.python.org/downloads/release/python-2716/"
 	},
 	{
+	    name: "python/3.7",
+	    url: "https://www.python.org/downloads/release/python-378/"
+	},
+	{
 	    name: "gatk/4.1.6.0",
 	    url: "https://software.broadinstitute.org/gatk/download/index"
 	}
 	]
+	output_meta: {
+	    snvsVcf: "VCF file with SNVs, .gz compressed",
+	    indelsVcf: "VCF file with indels, .gz compressed"
+	}
     }
 
     # Interval file provided, perform scatter/gather
@@ -71,7 +79,12 @@ workflow strelkaSomatic {
             scatterCount = numChunk
 	}
 	Array[File] intervals = splitIntervals.intervalFiles
-	scatter(interval in intervals) {
+	call convertIntervalsToBed {
+	    input:
+	    intervalFiles = intervals
+	}
+	Array[File] bedIntervals = convertIntervalsToBed.bedFiles
+	scatter(interval in bedIntervals) {
 	    call configureAndRun as configureAndRunParallel {
 		input:
 		tumorBam = tumorBam,
@@ -193,6 +206,59 @@ task configureAndRun {
 	File snvsVcf = "./results/variants/somatic.snvs.vcf.gz"
 	File indelsVcf = "./results/variants/somatic.indels.vcf.gz"
     }
+}
+
+task convertIntervalsToBed {
+
+    # convert GATK .interval_files to .bed by subtracting 1 from each interval start point
+
+    input {
+	Array[File] intervalFiles
+	String modules = "python/3.7"
+	Int memory = 16
+	Int timeout = 4
+    }
+
+    parameter_meta {
+	intervalFiles: "Files in GATK .interval_file format"
+	modules: "Environment modules"
+	memory: "Memory allocated for job"
+	timeout: "Hours before task timeout"
+    }
+
+    meta {
+	output_meta: {
+	    bedFiles: "Output files converted to .bed format"
+	}
+    }
+
+    command <<<
+        python3 <<CODE
+        import os, re
+        intervalFiles = re.split(",", "~{sep=',' intervalFiles}")
+        for intervalFile in intervalFiles:
+            items = re.split("\.", os.path.basename(intervalFile))
+            items.pop() # remove .interval_list suffix
+            bedName = ".".join(items)+".bed"
+            with open(intervalFile, 'r') as inFile, open(bedName, 'w') as outFile:
+                for line in inFile:
+                    if not re.match("@", line): # omit the GATK header
+                        fields = re.split("\t", line.strip())
+                        fields[1] = str(int(fields[1]) - 1)
+                        outFile.write("\t".join(fields)+"\n")
+        CODE
+    >>>
+
+    runtime {
+	memory:  "~{memory} GB"
+	modules: "~{modules}"
+	timeout: "~{timeout}"
+    }
+
+    output {
+	Array[File] bedFiles = glob("*.bed")
+    }
+
 }
 
 task splitIntervals {
