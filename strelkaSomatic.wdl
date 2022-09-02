@@ -139,7 +139,7 @@ task configureAndRun {
 	String refFasta
 	String refIndex
 	String refModule
-	File? regionsBed
+	String? regionsBed
 	String outputFileNamePrefix
 	String nonRefModules = "python/2.7 samtools/1.9 strelka/2.9.10"
 	Int jobMemory = 16

@@ -1,0 +1,117 @@
+[
+	{
+		"arguments": {
+			"strelkaSomatic.vcfGather.gatk": "",
+			"strelkaSomatic.vcfGather.memory": 16,
+			"strelkaSomatic.vcfGather.modules": "",
+			"strelkaSomatic.vcfGather.timeout": 4,
+			"strelkaSomatic.configureAndRunSingle.regionsBed": "",
+			"strelkaSomatic.configureAndRunSingle.nonRefModules": "python/2.7 samtools/1.9 strelka/2.9.10",
+			"strelkaSomatic.configureAndRunSingle.jobMemory": 16,
+			"strelkaSomatic.configureAndRunSingle.threads": 4,
+			"strelkaSomatic.configureAndRunSingle.timeout": 4,
+			"strelkaSomatic.refFasta": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa",
+			"strelkaSomatic.refIndex": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa.fai",
+			"strelkaSomatic.refDict": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.dict",
+	    		"strelkaSomatic.bedFile": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19.chrom.sizes.bed",
+			"strelkaSomatic.refModule": "hg19/p13",
+			"strelkaSomatic.numChunk": 4,
+			"strelkaSomatic.tumorBam": {
+				"contents": {
+					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam",
+					"externalIds": [
+						{
+							"id": "TEST",
+							"provider": "TEST"
+						}
+					]
+				},
+				"type": "EXTERNAL"
+			},
+			"strelkaSomatic.tumorBai":  {
+            			"contents": {
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam.bai",
+                		    	"externalIds": [
+                        			{
+		                            		"id": "TEST",
+                		            		"provider": "TEST"
+		                        	}
+                		    	]
+		                },
+                		"type": "EXTERNAL"
+		        },
+	   		"strelkaSomatic.normalBam":  {
+                		"contents": {
+                    			"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam",
+			                "externalIds": [
+                        			{
+			                            "id": "TEST",
+                        			    "provider": "TEST"
+			                        }
+                    			]
+                		},
+               			 "type": "EXTERNAL"
+            		},
+	    		"strelkaSomatic.normalBai":  {
+                		"contents": {
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam.bai",
+			                "externalIds": [
+                        			{
+			                            "id": "TEST",
+                        			    "provider": "TEST"
+                        			}
+                    			]
+                		},
+		                "type": "EXTERNAL"
+            		}
+		},
+		"description": "Strelka somatic workflow test",
+		"engineArguments": {
+			"write_to_cache": false,
+			"read_from_cache": false
+		},
+		"id": "AN_ID",
+		"metadata": {
+			"strelkaSomatic.resultSnvFile": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+					}
+				],
+				"type": "ALL"
+			},
+			"strelkaSomatic.resultSnvIndexFile": {
+		                "contents": [
+                    			{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+					}
+		                ],
+                		"type": "ALL"
+		        },
+			"strelkaSomatic.resultIndelFile": {
+        		        "contents": [
+                    			{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+					}
+                		],
+                		"type": "ALL"
+            		},
+			"strelkaSomatic.resultIndelIndexFile": {
+		                "contents": [
+                    			{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+					}
+		                ],
+                		"type": "ALL"
+		            }
+		},
+		"validators": [
+			{
+				"metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
+				"metrics_compare": "@CHECKOUT@/tests/compare.sh",
+				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation",
+				"type": "script"
+			}
+		]
+	}
+]
