@@ -23,7 +23,7 @@
                         "strelkaSomatic.configureAndRunParallel.nonRefModules": "python/2.7 samtools/1.9 strelka/2.9.10",
                         "strelkaSomatic.configureAndRunParallel.jobMemory": 16,
                         "strelkaSomatic.configureAndRunParallel.threads": 4,
-                        "strelkaSomatic.configureAndRunParralel.timeout": 4,
+                        "strelkaSomatic.configureAndRunParallel.timeout": 4,
                         "strelkaSomatic.splitIntervals.gatk": "$GATK_ROOT/bin/gatk",
                         "strelkaSomatic.splitIntervals.memory": 32,
                         "strelkaSomatic.splitIntervals.nonRefModules": "gatk/4.1.2.0",
@@ -100,7 +100,7 @@
 				],
 				"type": "ALL"
 			},
-			"strelkaSomatic.indelsVcfs": {
+			"strelkaSomatic.indelsVcf": {
 		                "contents": [
                     			{
 						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
