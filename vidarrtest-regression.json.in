@@ -23,12 +23,12 @@
                         "strelkaSomatic.configureAndRunParallel.nonRefModules": "python/2.7 samtools/1.9 strelka/2.9.10",
                         "strelkaSomatic.configureAndRunParallel.jobMemory": 16,
                         "strelkaSomatic.configureAndRunParallel.threads": 4,
-                        "strelkaSomatic.configureAndRunSingle.timeout": 4,
+                        "strelkaSomatic.configureAndRunParralel.timeout": 4,
                         "strelkaSomatic.splitIntervals.gatk": "$GATK_ROOT/bin/gatk",
                         "strelkaSomatic.splitIntervals.memory": 32,
                         "strelkaSomatic.splitIntervals.nonRefModules": "gatk/4.1.2.0",
                         "strelkaSomatic.splitIntervals.splitIntervalsExtraArgs": "",
-                        "strelkaSomatic.splitIntervals.timeout": "72",
+                        "strelkaSomatic.splitIntervals.timeout": 72,
 			"strelkaSomatic.refFasta": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa",
 			"strelkaSomatic.refIndex": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa.fai",
 			"strelkaSomatic.refDict": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.dict",
@@ -92,7 +92,7 @@
 		},
 		"id": "AN_ID",
 		"metadata": {
-			"strelkaSomatic.resultSnvFile": {
+			"strelkaSomatic.snvsVcf": {
 				"contents": [
 					{
 						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
@@ -100,30 +100,14 @@
 				],
 				"type": "ALL"
 			},
-			"strelkaSomatic.resultSnvIndexFile": {
+			"strelkaSomatic.indelsVcfs": {
 		                "contents": [
                     			{
 						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
 					}
 		                ],
                 		"type": "ALL"
-		        },
-			"strelkaSomatic.resultIndelFile": {
-        		        "contents": [
-                    			{
-						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
-					}
-                		],
-                		"type": "ALL"
-            		},
-			"strelkaSomatic.resultIndelIndexFile": {
-		                "contents": [
-                    			{
-						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
-					}
-		                ],
-                		"type": "ALL"
-		            }
+		        }
 		},
 		"validators": [
 			{
