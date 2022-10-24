@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v1.0.0 2020-10-24
+- bed file as String, minor changes
+
 ## Unreleased
 - Upgrade for Vidarr
 

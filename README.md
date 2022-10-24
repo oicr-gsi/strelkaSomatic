@@ -33,12 +33,14 @@ Parameter|Value|Description
 `refIndex`|String|Reference FAI index
 `refDict`|String|Reference DICT file
 `refModule`|String|Name of genome reference environment module
+`snvsVcfGather.refIndex`|String|fai of the reference assembly, determines the ordering by chromosome
+`indelsVcfGather.refIndex`|String|fai of the reference assembly, determines the ordering by chromosome
 
 
 #### Optional workflow parameters:
 Parameter|Value|Default|Description
 ---|---|---|---
-`bedFile`|File?|None|BED file designating regions to process
+`bedFile`|String?|None|BED file designating regions to process
 `numChunk`|Int?|None|If BED file given, number of chunks in which to split each chromosome
 `outputFileNamePrefix`|String|"strelkaSomatic"|Prefix for output files
 
@@ -66,7 +68,7 @@ Parameter|Value|Default|Description
 `indelsVcfGather.gatk`|String|"$GATK_ROOT/bin/gatk"|GATK to use
 `indelsVcfGather.memory`|Int|16|Memory allocated for job
 `indelsVcfGather.timeout`|Int|12|Hours before task timeout
-`configureAndRunSingle.regionsBed`|File?|None|BED file designating regions to process
+`configureAndRunSingle.regionsBed`|String?|None|BED file designating regions to process
 `configureAndRunSingle.nonRefModules`|String|"python/2.7 samtools/1.9 strelka/2.9.10"|Environment module names other than genome reference
 `configureAndRunSingle.jobMemory`|Int|16|Memory allocated for job
 `configureAndRunSingle.threads`|Int|4|Number of threads for processing
@@ -81,31 +83,90 @@ Output | Type | Description
 `indelsVcf`|File|VCF file with indels, .gz compressed
 
 
-## Niassa + Cromwell
-
-This WDL workflow is wrapped in a Niassa workflow (https://github.com/oicr-gsi/pipedev/tree/master/pipedev-niassa-cromwell-workflow) so that it can used with the Niassa metadata tracking system (https://github.com/oicr-gsi/niassa).
-
-* Building
-```
-mvn clean install
-```
-
-* Testing
-```
-mvn clean verify \
--Djava_opts="-Xmx1g -XX:+UseG1GC -XX:+UseStringDeduplication" \
--DrunTestThreads=2 \
--DskipITs=false \
--DskipRunITs=false \
--DworkingDirectory=/path/to/tmp/ \
--DschedulingHost=niassa_oozie_host \
--DwebserviceUrl=http://niassa-url:8080 \
--DwebserviceUser=niassa_user \
--DwebservicePassword=niassa_user_password \
--Dcromwell-host=http://cromwell-url:8000
-```
-
-## Support
+## Commands
+ 
+ This section lists command(s) run by strelkaSomatic workflow
+ 
+ * Running strelkaSomatic
+ 
+ ### Main task, configuring and running Strelka2
+ 
+ ```
+ 	set -eo pipefail
+ 
+ 	~{writeBed}
+ 	~{indexFeatureFile}
+ 
+ 	configureStrelkaSomaticWorkflow.py \
+ 	--normalBam ~{normalBam} \
+ 	--tumorBam ~{tumorBam} \
+ 	--referenceFasta ~{refFasta} \
+ 	~{regionsBedArg} \
+ 	--runDir .
+ 
+ 	./runWorkflow.py -m local -j ~{threads}
+ ```
+ 
+ ### Converting interval files to .bed
+ 
+ .bed files use 0-based index, we need to do a proper conversion of interval files 
+ 
+ ```
+         python3 <<CODE
+         import os, re
+         intervalFiles = re.split(",", "~{sep=',' intervalFiles}")
+         for intervalFile in intervalFiles:
+             items = re.split("\.", os.path.basename(intervalFile))
+             items.pop() # remove .interval_list suffix
+             bedName = ".".join(items)+".bed"
+             with open(intervalFile, 'r') as inFile, open(bedName, 'w') as outFile:
+                 for line in inFile:
+                     if not re.match("@", line): # omit the GATK header
+                         fields = re.split("\t", line.strip())
+                         fields[1] = str(int(fields[1]) - 1)
+                         outFile.write("\t".join(fields)+"\n")
+         CODE
+ ```
+ 
+ ### Splitting intervals
+ 
+ SplitIntervals is used to produce a requested number of files
+ to make the analysis parallel, decreasing demand for resources per chunk
+ and improving speed
+ 
+ ```
+ 	set -eo pipefail
+ 
+ 	mkdir interval-files
+ 	ln -s ~{refFai}
+ 	ln -s ~{refDict}
+ 	~{gatk} --java-options "-Xmx~{memory-8}g" SplitIntervals \
+ 	-R ~{refFasta} \
+ 	~{intervalsArg} \
+ 	~{scatterArg} \
+ 	--subdivision-mode BALANCING_WITHOUT_INTERVAL_SUBDIVISION \
+ 	-O interval-files \
+ 	~{splitIntervalsExtraArgs}
+ 
+ 	cp interval-files/*.interval_list .
+ ```
+ 
+ ### Combining vcf files after scatter
+ 
+ This task uses GatherVcfs tools from GATK suite which needs the files to be ordered. 
+ No overlap between covered features allowed.
+ 
+ ```
+    set -eo pipefail
+ 
+    ~{gatk} GatherVcfs \
+    -I ~{sep=" -I " vcfs} \
+    -R ~{refFasta}
+    -O ~{outputName}
+ 
+    gzip ~{outputName}
+ ```
+ ## Support
 
 For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
 

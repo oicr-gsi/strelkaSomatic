@@ -2,6 +2,7 @@
 	{
 		"arguments": {
 			"strelkaSomatic.vcfGather.gatk": "",
+                        "strelkaSomatic.vcfGather.refIndex": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa.fai",
 			"strelkaSomatic.vcfGather.memory": 16,
 			"strelkaSomatic.vcfGather.modules": "",
 			"strelkaSomatic.vcfGather.timeout": 4,
