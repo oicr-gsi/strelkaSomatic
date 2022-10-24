@@ -90,7 +90,7 @@
 			"write_to_cache": false,
 			"read_from_cache": false
 		},
-		"id": "AN_ID",
+		"id": "SOMATIC",
 		"metadata": {
 			"strelkaSomatic.snvsVcf": {
 				"contents": [
