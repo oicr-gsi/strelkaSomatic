@@ -232,7 +232,7 @@
 			{
 				"metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
 				"metrics_compare": "@CHECKOUT@/tests/compare.sh",
-				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation/SOMATIC.metrics",
+				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation/SOMATIC_HG38.metrics",
 				"type": "script"
 			}
 		]
