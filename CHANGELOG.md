@@ -1,10 +1,7 @@
 # CHANGELOG
 
 ## v1.0.0 2020-10-24
-- bed file as String, minor changes
-
-## Unreleased
-- Upgrade for Vidarr
+- bed file as String, minor changes. Upgrade for Vidarr
 
 ## v0.2.0: 2020-09-02
 - GP-2466 Convert .interval_list files to .bed format before input to Strelka

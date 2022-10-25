@@ -117,5 +117,124 @@
 				"type": "script"
 			}
 		]
+	},
+	{
+		"arguments": {
+			"strelkaSomatic.indelsVcfGather.gatk": null,
+                        "strelkaSomatic.indelsVcfGather.refIndex": "/.mounts/labs/gsi/modulator/sw/data/hg38-p12/hg38_random.fa.fai",
+			"strelkaSomatic.indelsVcfGather.memory": 16,
+			"strelkaSomatic.indelsVcfGather.modules": null,
+			"strelkaSomatic.indelsVcfGather.timeout": 4,
+                        "strelkaSomatic.snvsVcfGather.gatk": null,
+                        "strelkaSomatic.snvsVcfGather.refIndex": "/.mounts/labs/gsi/modulator/sw/data/hg38-p12/hg38_random.fa.fai",
+                        "strelkaSomatic.snvsVcfGather.memory": 16,
+                        "strelkaSomatic.snvsVcfGather.modules": null,
+                        "strelkaSomatic.snvsVcfGather.timeout": 4,
+                        "strelkaSomatic.configureAndRunSingle.regionsBed": null,
+			"strelkaSomatic.configureAndRunSingle.nonRefModules": "python/2.7 samtools/1.9 strelka/2.9.10",
+			"strelkaSomatic.configureAndRunSingle.jobMemory": 16,
+			"strelkaSomatic.configureAndRunSingle.threads": 4,
+			"strelkaSomatic.configureAndRunSingle.timeout": 4,
+                        "strelkaSomatic.convertIntervalsToBed.memory": 16,
+                        "strelkaSomatic.convertIntervalsToBed.modules": "python/3.7",
+                        "strelkaSomatic.convertIntervalsToBed.timeout": 4,
+                        "strelkaSomatic.configureAndRunParallel.regionsBed": null,
+                        "strelkaSomatic.configureAndRunParallel.nonRefModules": "python/2.7 samtools/1.9 strelka/2.9.10",
+                        "strelkaSomatic.configureAndRunParallel.jobMemory": 16,
+                        "strelkaSomatic.configureAndRunParallel.threads": 4,
+                        "strelkaSomatic.configureAndRunParallel.timeout": 4,
+                        "strelkaSomatic.splitIntervals.gatk": "$GATK_ROOT/bin/gatk",
+                        "strelkaSomatic.splitIntervals.memory": 32,
+                        "strelkaSomatic.splitIntervals.nonRefModules": "gatk/4.1.2.0",
+                        "strelkaSomatic.splitIntervals.splitIntervalsExtraArgs": null,
+                        "strelkaSomatic.splitIntervals.timeout": 72,
+			"strelkaSomatic.refFasta": "/.mounts/labs/gsi/modulator/sw/data/hg38-p12/hg38_random.fa",
+			"strelkaSomatic.refIndex": "/.mounts/labs/gsi/modulator/sw/data/hg38-p12/hg38_random.fa.fai",
+			"strelkaSomatic.refDict": "/.mounts/labs/gsi/modulator/sw/data/hg38-p12/hg38_random.dict",
+	    		"strelkaSomatic.bedFile": "/.mounts/labs/gsi/modulator/sw/data/hg38-p12/hg38.chrom.sizes.bed",
+			"strelkaSomatic.refModule": "hg38/p12",
+			"strelkaSomatic.numChunk": 4,
+                        "strelkaSomatic.outputFileNamePrefix": "strelkaSomatic",
+			"strelkaSomatic.tumorBam": {
+				"contents": {
+					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam",
+					"externalIds": [
+						{
+							"id": "TEST",
+							"provider": "TEST"
+						}
+					]
+				},
+				"type": "EXTERNAL"
+			},
+			"strelkaSomatic.tumorBai":  {
+            			"contents": {
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam.bai",
+                		    	"externalIds": [
+                        			{
+		                            		"id": "TEST",
+                		            		"provider": "TEST"
+		                        	}
+                		    	]
+		                },
+                		"type": "EXTERNAL"
+		        },
+	   		"strelkaSomatic.normalBam":  {
+                		"contents": {
+                    			"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam",
+			                "externalIds": [
+                        			{
+			                            "id": "TEST",
+                        			    "provider": "TEST"
+			                        }
+                    			]
+                		},
+               			 "type": "EXTERNAL"
+            		},
+	    		"strelkaSomatic.normalBai":  {
+                		"contents": {
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam.bai",
+			                "externalIds": [
+                        			{
+			                            "id": "TEST",
+                        			    "provider": "TEST"
+                        			}
+                    			]
+                		},
+		                "type": "EXTERNAL"
+            		}
+		},
+		"description": "Strelka somatic workflow test",
+		"engineArguments": {
+			"write_to_cache": false,
+			"read_from_cache": false
+		},
+		"id": "SOMATIC_HG38",
+		"metadata": {
+			"strelkaSomatic.snvsVcf": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+					}
+				],
+				"type": "ALL"
+			},
+			"strelkaSomatic.indelsVcf": {
+		                "contents": [
+                    			{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+					}
+		                ],
+                		"type": "ALL"
+		        }
+		},
+		"validators": [
+			{
+				"metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
+				"metrics_compare": "@CHECKOUT@/tests/compare.sh",
+				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation/SOMATIC.metrics",
+				"type": "script"
+			}
+		]
 	}
 ]
