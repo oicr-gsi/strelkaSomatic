@@ -157,7 +157,7 @@
                         "strelkaSomatic.outputFileNamePrefix": "strelkaSomatic",
 			"strelkaSomatic.tumorBam": {
 				"contents": {
-					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam",
+					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/OCT_011394_Ov_P_PE_405_WG.chr22.bam",
 					"externalIds": [
 						{
 							"id": "TEST",
@@ -169,7 +169,7 @@
 			},
 			"strelkaSomatic.tumorBai":  {
             			"contents": {
-		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam.bai",
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/OCT_011394_Ov_P_PE_405_WG.chr22.bam.bai",
                 		    	"externalIds": [
                         			{
 		                            		"id": "TEST",
@@ -181,7 +181,7 @@
 		        },
 	   		"strelkaSomatic.normalBam":  {
                 		"contents": {
-                    			"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam",
+                    			"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/OCT_011394_Ly_R_PE_460_WG.chr22.bam",
 			                "externalIds": [
                         			{
 			                            "id": "TEST",
@@ -193,7 +193,7 @@
             		},
 	    		"strelkaSomatic.normalBai":  {
                 		"contents": {
-		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam.bai",
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/OCT_011394_Ly_R_PE_460_WG.chr22.bam.bai",
 			                "externalIds": [
                         			{
 			                            "id": "TEST",
