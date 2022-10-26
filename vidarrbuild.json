@@ -1,0 +1,7 @@
+{
+  "names": [
+    "strelka2_somatic",
+    "strelka2_somatic_by_tumor_group"
+  ],
+  "wdl": "strelkaSomatic.wdl"
+}

@@ -11,7 +11,7 @@ workflow strelkaSomatic {
 	String refIndex
 	String refDict
 	String refModule
-	File? bedFile
+	String? bedFile
 	Int? numChunk
 	String outputFileNamePrefix = "strelkaSomatic"
     }
@@ -139,7 +139,7 @@ task configureAndRun {
 	String refFasta
 	String refIndex
 	String refModule
-	File? regionsBed
+	String? regionsBed
 	String outputFileNamePrefix
 	String nonRefModules = "python/2.7 samtools/1.9 strelka/2.9.10"
 	Int jobMemory = 16
@@ -269,7 +269,7 @@ task splitIntervals {
 	String refDict
 	String refModule
 	String gatk = "$GATK_ROOT/bin/gatk"
-	File? intervals
+	String? intervals
 	Int? scatterCount
 	String? splitIntervalsExtraArgs
 	String nonRefModules = "gatk/4.1.2.0"
@@ -334,6 +334,7 @@ task vcfGather {
     input {
 	String modules = "gatk/4.1.2.0"
 	String gatk = "$GATK_ROOT/bin/gatk"
+        String refIndex
 	Array[File] vcfs
 	Int memory = 16
 	Int timeout = 12
@@ -342,6 +343,7 @@ task vcfGather {
     parameter_meta {
 	modules: "Environment module names and version to load (space separated) before command execution"
 	gatk: "GATK to use"
+        refIndex: "fai of the reference assembly, determines the ordering by chromosome"
 	vcfs: "VCFs from scatter to merge together"
 	memory: "Memory allocated for job"
 	timeout: "Hours before task timeout"
@@ -364,6 +366,7 @@ task vcfGather {
 
 	~{gatk} GatherVcfs \
 	-I ~{sep=" -I " vcfs} \
+	-R ~{refIndex} \
 	-O ~{outputName}
 
 	gzip ~{outputName}

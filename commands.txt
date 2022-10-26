@@ -1,0 +1,83 @@
+## Commands
+
+This section lists command(s) run by strelkaSomatic workflow
+
+* Running strelkaSomatic
+
+### Main task, configuring and running Strelka2
+
+```
+	set -eo pipefail
+
+	~{writeBed}
+	~{indexFeatureFile}
+
+	configureStrelkaSomaticWorkflow.py \
+	--normalBam ~{normalBam} \
+	--tumorBam ~{tumorBam} \
+	--referenceFasta ~{refFasta} \
+	~{regionsBedArg} \
+	--runDir .
+
+	./runWorkflow.py -m local -j ~{threads}
+```
+
+### Converting interval files to .bed
+
+.bed files use 0-based index, we need to do a proper conversion of interval files 
+
+```
+        python3 <<CODE
+        import os, re
+        intervalFiles = re.split(",", "~{sep=',' intervalFiles}")
+        for intervalFile in intervalFiles:
+            items = re.split("\.", os.path.basename(intervalFile))
+            items.pop() # remove .interval_list suffix
+            bedName = ".".join(items)+".bed"
+            with open(intervalFile, 'r') as inFile, open(bedName, 'w') as outFile:
+                for line in inFile:
+                    if not re.match("@", line): # omit the GATK header
+                        fields = re.split("\t", line.strip())
+                        fields[1] = str(int(fields[1]) - 1)
+                        outFile.write("\t".join(fields)+"\n")
+        CODE
+```
+
+### Splitting intervals
+
+SplitIntervals is used to produce a requested number of files
+to make the analysis parallel, decreasing demand for resources per chunk
+and improving speed
+
+```
+	set -eo pipefail
+
+	mkdir interval-files
+	ln -s ~{refFai}
+	ln -s ~{refDict}
+	~{gatk} --java-options "-Xmx~{memory-8}g" SplitIntervals \
+	-R ~{refFasta} \
+	~{intervalsArg} \
+	~{scatterArg} \
+	--subdivision-mode BALANCING_WITHOUT_INTERVAL_SUBDIVISION \
+	-O interval-files \
+	~{splitIntervalsExtraArgs}
+
+	cp interval-files/*.interval_list .
+```
+
+### Combining vcf files after scatter
+
+This task uses GatherVcfs tools from GATK suite which needs the files to be ordered. 
+No overlap between covered features allowed.
+
+```
+   set -eo pipefail
+
+   ~{gatk} GatherVcfs \
+   -I ~{sep=" -I " vcfs} \
+   -R ~{refFasta}
+   -O ~{outputName}
+
+   gzip ~{outputName}
+```
