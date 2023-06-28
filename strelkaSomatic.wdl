@@ -100,8 +100,6 @@ workflow strelkaSomatic {
 	}
     }
 
-    # Interval file provided, perform scatter/gather
-    if(defined(bedFile)) {
 	call splitIntervals {
 	    input:
 	    refFasta = resources[reference].refFasta,
@@ -141,26 +139,11 @@ workflow strelkaSomatic {
 	    vcfs = configureAndRunParallel.indelsVcf,
             refIndex = resources[reference].indelsVcfGather_refIndex
 	}
-    }
-    # No interval file, run as single process
-    if(!defined(bedFile)) {
-	call configureAndRun as configureAndRunSingle {
-	    input:
-	    tumorBam = tumorBam,
-	    tumorBai = tumorBai,
-	    normalBam = normalBam,
-	    normalBai = normalBai,
-	    refFasta = resources[reference].refFasta,
-	    refIndex = resources[reference].refIndex,
-	    refModule = resources[reference].refModule,
-	    outputFileNamePrefix = outputFileNamePrefix
-	}
-    }
-
+    
     # Do not output the TSV and XML stats files; contents not needed
     output {
-	File snvsVcf = select_first([snvsVcfGather.result, configureAndRunSingle.snvsVcf])
-	File indelsVcf = select_first([indelsVcfGather.result, configureAndRunSingle.indelsVcf])
+	File snvsVcf = snvsVcfGather.result
+	File indelsVcf = indelsVcfGather.result
     }
 }
 
