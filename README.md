@@ -29,10 +29,7 @@ Parameter|Value|Description
 `tumorBai`|File|BAM index file for tumor data
 `normalBam`|File|Input BAM file with normal data
 `normalBai`|File|BAM index file for normal data
-`refFasta`|String|Reference FASTA file
-`refIndex`|String|Reference FAI index
-`refDict`|String|Reference DICT file
-`refModule`|String|Name of genome reference environment module
+`reference`|String|Reference assembly id
 `snvsVcfGather.refIndex`|String|fai of the reference assembly, determines the ordering by chromosome
 `indelsVcfGather.refIndex`|String|fai of the reference assembly, determines the ordering by chromosome
 
@@ -52,6 +49,7 @@ Parameter|Value|Default|Description
 `splitIntervals.splitIntervalsExtraArgs`|String?|None|Additional arguments for the 'gatk SplitIntervals' command
 `splitIntervals.nonRefModules`|String|"gatk/4.1.2.0"|Environment modules other than the genome refence
 `splitIntervals.memory`|Int|32|Memory allocated for job
+`splitIntervals.overhead`|Int|8|Memory overhead for running on a node
 `splitIntervals.timeout`|Int|72|Hours before task timeout
 `convertIntervalsToBed.modules`|String|"python/3.7"|Environment modules
 `convertIntervalsToBed.memory`|Int|16|Memory allocated for job
