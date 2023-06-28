@@ -134,10 +134,12 @@ workflow strelkaSomatic {
 	call vcfGather as snvsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.snvsVcf,
+            refIndex = resources[reference].snvsVcfGather_refIndex
 	}
 	call vcfGather as indelsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.indelsVcf,
+            refIndex = resources[reference].indelsVcfGather_refIndex
 	}
     }
     # No interval file, run as single process
