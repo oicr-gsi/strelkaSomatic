@@ -6,7 +6,8 @@ struct referenceResources {
   String indelsVcfGather_refIndex 
   String snvsVcfGather_refIndex 
   String refFasta 
-  String refModule 
+  String refModule
+  String bedFile
 }
 
 workflow strelkaSomatic {
@@ -32,7 +33,8 @@ workflow strelkaSomatic {
         "indelsVcfGather_refIndex": "$HG19_ROOT/hg19_random.fa.fai",
         "snvsVcfGather_refIndex": "$HG19_ROOT/hg19_random.fa.fai",
         "refFasta": "$HG19_ROOT/hg19_random.fa",
-        "refModule": "hg19/p13 samtools/1.9"
+        "refModule": "hg19/p13 samtools/1.9",
+        "bedFile": "$HG19_ROOT/hg19.chrom.sizes.bed"
       },
       "hg38": {
         "refDict": "$HG38_ROOT/hg38_random.dict",
@@ -40,7 +42,8 @@ workflow strelkaSomatic {
         "indelsVcfGather_refIndex": "$HG38_ROOT/hg38_random.fa.fai",
         "snvsVcfGather_refIndex": "$HG38_ROOT/hg38_random.fa.fai",
         "refFasta": "$HG38_ROOT/hg38_random.fa",
-        "refModule": "hg38/p12 samtools/1.9"
+        "refModule": "hg38/p12 samtools/1.9",
+        "bedFile": "$HG38_ROOT/hg38.chrom.sizes.bed"
       },
       "mm10": {
         "refDict": "$MM10_ROOT/mm10.dict",
@@ -48,7 +51,8 @@ workflow strelkaSomatic {
         "indelsVcfGather_refIndex": "$MM10_ROOT/mm10.fa.fai",
         "snvsVcfGather_refIndex": "$MM10_ROOT/mm10.fa.fai",
         "refFasta": "$MM10_ROOT/mm10.fa",
-        "refModule": "mm10/p6 samtools/1.9"
+        "refModule": "mm10/p6 samtools/1.9",
+        "bedFile": "$MM10_ROOT/mm10.chrom.sizes.bed"
       }
     }   
  
@@ -104,7 +108,7 @@ workflow strelkaSomatic {
 	    refFai = resources[reference].refIndex,
 	    refDict = resources[reference].refDict,
 	    refModule = resources[reference].refModule,
-            intervals = bedFile,
+	    intervals = select_first([bedFile, resources[reference].bedFile]),
             scatterCount = numChunk
 	}
 	Array[File] intervals = splitIntervals.intervalFiles
