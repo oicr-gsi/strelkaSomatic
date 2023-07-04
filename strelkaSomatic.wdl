@@ -1,35 +1,68 @@
 version 1.0
 
+struct referenceResources {
+  String refDict
+  String refIndex 
+  String indelsVcfGather_refIndex 
+  String snvsVcfGather_refIndex 
+  String refFasta 
+  String refModule
+  String bedFile
+}
+
 workflow strelkaSomatic {
 
-    input {
-	File tumorBam
-	File tumorBai
-	File normalBam
-	File normalBai
-	String refFasta
-	String refIndex
-	String refDict
-	String refModule
-	String? bedFile
-	Int? numChunk
-	String outputFileNamePrefix = "strelkaSomatic"
+   input {
+      File tumorBam
+      File tumorBai
+      File normalBam
+      File normalBai
+      String reference
+      String? bedFile
+      Int? numChunk
+      String outputFileNamePrefix = "strelkaSomatic"
     }
 
     # store genome references as String, not File
     # allows correct interpolation of environment variables
     # Eg. for "strelkaSomatic.refDict": "$HG38_ROOT/hg38_random.dict"
-    
+    Map [String,referenceResources] resources = {
+      "hg19": {
+        "refDict": "$HG19_ROOT/hg19_random.dict",
+        "refIndex": "$HG19_ROOT/hg19_random.fa.fai",
+        "indelsVcfGather_refIndex": "$HG19_ROOT/hg19_random.fa.fai",
+        "snvsVcfGather_refIndex": "$HG19_ROOT/hg19_random.fa.fai",
+        "refFasta": "$HG19_ROOT/hg19_random.fa",
+        "refModule": "hg19/p13 samtools/1.9",
+        "bedFile": "$HG19_ROOT/hg19.chrom.sizes.bed"
+      },
+      "hg38": {
+        "refDict": "$HG38_ROOT/hg38_random.dict",
+        "refIndex": "$HG38_ROOT/hg38_random.fa.fai",
+        "indelsVcfGather_refIndex": "$HG38_ROOT/hg38_random.fa.fai",
+        "snvsVcfGather_refIndex": "$HG38_ROOT/hg38_random.fa.fai",
+        "refFasta": "$HG38_ROOT/hg38_random.fa",
+        "refModule": "hg38/p12 samtools/1.9",
+        "bedFile": "$HG38_ROOT/hg38.chrom.sizes.bed"
+      },
+      "mm10": {
+        "refDict": "$MM10_ROOT/mm10.dict",
+        "refIndex": "$MM10_ROOT/mm10.fa.fai",
+        "indelsVcfGather_refIndex": "$MM10_ROOT/mm10.fa.fai",
+        "snvsVcfGather_refIndex": "$MM10_ROOT/mm10.fa.fai",
+        "refFasta": "$MM10_ROOT/mm10.fa",
+        "refModule": "mm10/p6 samtools/1.9",
+        "bedFile": "$MM10_ROOT/mm10.chrom.sizes.bed"
+      }
+    }   
+ 
     parameter_meta {
 	tumorBam: "Input BAM file with tumor data"
 	tumorBai: "BAM index file for tumor data"
 	normalBam: "Input BAM file with normal data"
 	normalBai: "BAM index file for normal data"
-	refFasta: "Reference FASTA file"
-	refIndex: "Reference FAI index"
-	refModule: "Name of genome reference environment module"
-	refDict: "Reference DICT file"
-	bedFile: "BED file designating regions to process"
+	reference: "Reference assembly id"
+        bedFile: "BED file designating regions to process"
 	numChunk: "If BED file given, number of chunks in which to split each chromosome"
 	outputFileNamePrefix: "Prefix for output files"
     }
@@ -67,15 +100,13 @@ workflow strelkaSomatic {
 	}
     }
 
-    # Interval file provided, perform scatter/gather
-    if(defined(bedFile)) {
 	call splitIntervals {
 	    input:
-	    refFasta = refFasta,
-	    refFai = refIndex,
-	    refDict = refDict,
-	    refModule = refModule,
-            intervals = bedFile,
+	    refFasta = resources[reference].refFasta,
+	    refFai = resources[reference].refIndex,
+	    refDict = resources[reference].refDict,
+	    refModule = resources[reference].refModule,
+	    intervals = select_first([bedFile, resources[reference].bedFile]),
             scatterCount = numChunk
 	}
 	Array[File] intervals = splitIntervals.intervalFiles
@@ -91,9 +122,9 @@ workflow strelkaSomatic {
 		tumorBai = tumorBai,
 		normalBam = normalBam,
 		normalBai = normalBai,
-		refFasta = refFasta,
-		refIndex = refIndex,
-		refModule = refModule,
+		refFasta = resources[reference].refFasta,
+		refIndex = resources[reference].refIndex,
+		refModule = resources[reference].refModule,
 		regionsBed = interval,
 		outputFileNamePrefix = outputFileNamePrefix
 	    }
@@ -101,31 +132,18 @@ workflow strelkaSomatic {
 	call vcfGather as snvsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.snvsVcf,
+            refIndex = resources[reference].snvsVcfGather_refIndex
 	}
 	call vcfGather as indelsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.indelsVcf,
+            refIndex = resources[reference].indelsVcfGather_refIndex
 	}
-    }
-    # No interval file, run as single process
-    if(!defined(bedFile)) {
-	call configureAndRun as configureAndRunSingle {
-	    input:
-	    tumorBam = tumorBam,
-	    tumorBai = tumorBai,
-	    normalBam = normalBam,
-	    normalBai = normalBai,
-	    refFasta = refFasta,
-	    refIndex = refIndex,
-	    refModule = refModule,
-	    outputFileNamePrefix = outputFileNamePrefix
-	}
-    }
-
+    
     # Do not output the TSV and XML stats files; contents not needed
     output {
-	File snvsVcf = select_first([snvsVcfGather.result, configureAndRunSingle.snvsVcf])
-	File indelsVcf = select_first([indelsVcfGather.result, configureAndRunSingle.indelsVcf])
+	File snvsVcf = snvsVcfGather.result
+	File indelsVcf = indelsVcfGather.result
     }
 }
 
@@ -274,6 +292,7 @@ task splitIntervals {
 	String? splitIntervalsExtraArgs
 	String nonRefModules = "gatk/4.1.2.0"
 	Int memory = 32
+        Int overhead = 8
 	Int timeout = 72
     }
 
@@ -287,6 +306,7 @@ task splitIntervals {
 	scatterCount: "Number of files to split the interval file into"
 	splitIntervalsExtraArgs: "Additional arguments for the 'gatk SplitIntervals' command"
 	memory: "Memory allocated for job"
+        overhead: "Memory overhead for running on a node"
 	timeout: "Hours before task timeout"
 	nonRefModules: "Environment modules other than the genome refence"
     }
@@ -307,7 +327,7 @@ task splitIntervals {
 	mkdir interval-files
 	ln -s ~{refFai}
 	ln -s ~{refDict}
-	~{gatk} --java-options "-Xmx~{memory-8}g" SplitIntervals \
+	~{gatk} --java-options "-Xmx~{memory-overhead}g" SplitIntervals \
 	-R ~{refFasta} \
 	~{intervalsArg} \
 	~{scatterArg} \

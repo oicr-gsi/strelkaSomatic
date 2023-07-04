@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v1.1.0 2022-06-28
+- assembly-specific choices move into wdl
+
 ## v1.0.0 2020-10-24
 - bed file as String, minor changes. Upgrade for Vidarr
 
