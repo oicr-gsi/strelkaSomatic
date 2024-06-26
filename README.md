@@ -30,8 +30,6 @@ Parameter|Value|Description
 `normalBam`|File|Input BAM file with normal data
 `normalBai`|File|BAM index file for normal data
 `reference`|String|Reference assembly id
-`snvsVcfGather.refIndex`|String|fai of the reference assembly, determines the ordering by chromosome
-`indelsVcfGather.refIndex`|String|fai of the reference assembly, determines the ordering by chromosome
 
 
 #### Optional workflow parameters:
@@ -66,30 +64,25 @@ Parameter|Value|Default|Description
 `indelsVcfGather.gatk`|String|"$GATK_ROOT/bin/gatk"|GATK to use
 `indelsVcfGather.memory`|Int|16|Memory allocated for job
 `indelsVcfGather.timeout`|Int|12|Hours before task timeout
-`configureAndRunSingle.regionsBed`|String?|None|BED file designating regions to process
-`configureAndRunSingle.nonRefModules`|String|"python/2.7 samtools/1.9 strelka/2.9.10"|Environment module names other than genome reference
-`configureAndRunSingle.jobMemory`|Int|16|Memory allocated for job
-`configureAndRunSingle.threads`|Int|4|Number of threads for processing
-`configureAndRunSingle.timeout`|Int|4|Hours before task timeout
 
 
 ### Outputs
 
-Output | Type | Description
----|---|---
-`snvsVcf`|File|VCF file with SNVs, .gz compressed
-`indelsVcf`|File|VCF file with indels, .gz compressed
+Output | Type | Description | Labels
+---|---|---|---
+`snvsVcf`|File|VCF file with SNVs, .gz compressed|vidarr_label: snvsVcf
+`indelsVcf`|File|VCF file with indels, .gz compressed|vidarr_label: indelsVcf
 
 
 ## Commands
  
- This section lists command(s) run by strelkaSomatic workflow
+This section lists command(s) run by strelkaSomatic workflow
  
- * Running strelkaSomatic
+* Running strelkaSomatic
  
- ### Main task, configuring and running Strelka2
+### Main task, configuring and running Strelka2
  
- ```
+```
  	set -eo pipefail
  
  	~{writeBed}
@@ -103,13 +96,13 @@ Output | Type | Description
  	--runDir .
  
  	./runWorkflow.py -m local -j ~{threads}
- ```
+```
  
- ### Converting interval files to .bed
+### Converting interval files to .bed
  
- .bed files use 0-based index, we need to do a proper conversion of interval files 
+.bed files use 0-based index, we need to do a proper conversion of interval files 
  
- ```
+```
          python3 <<CODE
          import os, re
          intervalFiles = re.split(",", "~{sep=',' intervalFiles}")
@@ -124,15 +117,15 @@ Output | Type | Description
                          fields[1] = str(int(fields[1]) - 1)
                          outFile.write("\t".join(fields)+"\n")
          CODE
- ```
+```
  
- ### Splitting intervals
+### Splitting intervals
  
- SplitIntervals is used to produce a requested number of files
- to make the analysis parallel, decreasing demand for resources per chunk
- and improving speed
- 
- ```
+SplitIntervals is used to produce a requested number of files
+to make the analysis parallel, decreasing demand for resources per chunk
+and improving speed
+
+```
  	set -eo pipefail
  
  	mkdir interval-files
@@ -147,14 +140,14 @@ Output | Type | Description
  	~{splitIntervalsExtraArgs}
  
  	cp interval-files/*.interval_list .
- ```
+```
  
- ### Combining vcf files after scatter
+### Combining vcf files after scatter
  
- This task uses GatherVcfs tools from GATK suite which needs the files to be ordered. 
- No overlap between covered features allowed.
+This task uses GatherVcfs tools from GATK suite which needs the files to be ordered. 
+No overlap between covered features allowed.
  
- ```
+```
     set -eo pipefail
  
     ~{gatk} GatherVcfs \
@@ -163,8 +156,8 @@ Output | Type | Description
     -O ~{outputName}
  
     gzip ~{outputName}
- ```
- ## Support
+```
+## Support
 
 For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
 

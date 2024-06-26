@@ -94,10 +94,16 @@ workflow strelkaSomatic {
 	    url: "https://software.broadinstitute.org/gatk/download/index"
 	}
 	]
-	output_meta: {
-	    snvsVcf: "VCF file with SNVs, .gz compressed",
-	    indelsVcf: "VCF file with indels, .gz compressed"
-	}
+    output_meta: {
+    snvsVcf: {
+        description: "VCF file with SNVs, .gz compressed",
+        vidarr_label: "snvsVcf"
+    },
+    indelsVcf: {
+        description: "VCF file with indels, .gz compressed",
+        vidarr_label: "indelsVcf"
+    }
+}
     }
 
 	call splitIntervals {
