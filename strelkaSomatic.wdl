@@ -21,6 +21,7 @@ workflow strelkaSomatic {
       String? bedFile
       Int? numChunk
       String outputFileNamePrefix = "strelkaSomatic"
+      String mode = "WG"
     }
 
     # store genome references as String, not File
@@ -65,12 +66,13 @@ workflow strelkaSomatic {
         bedFile: "BED file designating regions to process"
 	numChunk: "If BED file given, number of chunks in which to split each chromosome"
 	outputFileNamePrefix: "Prefix for output files"
+	mode: "WG (default), exome or targeted"
     }
 
 
     meta {
-	author: "Iain Bancarz"
-	email: "ibancarz@oicr.on.ca"
+	author: "Iain Bancarz, Lawrence Heisler"
+	email: "ibancarz@oicr.on.ca, lheisler@oicr.on.ca"
 	description: "Strelka variant caller in somatic mode"
 	dependencies: [
 	{
@@ -165,6 +167,7 @@ task configureAndRun {
 	String refModule
 	String? regionsBed
 	String outputFileNamePrefix
+	String mode
 	String nonRefModules = "python/2.7 samtools/1.9 strelka/2.9.10"
 	Int jobMemory = 16
 	Int threads = 4
@@ -180,6 +183,7 @@ task configureAndRun {
 	refIndex: "FAI reference index file"
 	refModule: "Genome reference module name"
 	regionsBed: "BED file designating regions to process"
+	mode : "by default Strelka will run across the whole genome (WG), alternately can run in exome or targeted sequencing mode"
 	nonRefModules: "Environment module names other than genome reference"
 	jobMemory: "Memory allocated for job"
 	timeout: "Hours before task timeout"
@@ -199,6 +203,7 @@ task configureAndRun {
     String writeBed = if defined(regionsBed) then "grep -v \"^@\" ~{regionsBed} | bgzip > ~{bedName}" else ""
     String indexFeatureFile = if defined(regionsBed) then "tabix ~{bedName}" else ""
     String regionsBedArg = if defined(regionsBed) then "--callRegions ~{bedName}" else ""
+	String runMode = if mode == "exome" then "--exome" elsif mode == "targeted" then "--targeted" else ""
 
     # index files not explicitly used, but needed by configureStrelkaSomaticWorkflow.py
     # ie. tumorBai, normalBai, refIndex; tabix output on bedfile (if any)
@@ -213,7 +218,7 @@ task configureAndRun {
 	--normalBam ~{normalBam} \
 	--tumorBam ~{tumorBam} \
 	--referenceFasta ~{refFasta} \
-	~{regionsBedArg} \
+	~{regionsBedArg} ~{runMode} \
 	--runDir .
 
 	./runWorkflow.py -m local -j ~{threads}
