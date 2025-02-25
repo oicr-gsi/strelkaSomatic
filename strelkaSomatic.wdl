@@ -145,8 +145,20 @@ workflow strelkaSomatic {
 	call vcfGather as indelsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.indelsVcf,
-            refIndex = resources[reference].indelsVcfGather_refIndex
+        refIndex = resources[reference].indelsVcfGather_refIndex
 	}
+	
+	call combineCalls {
+	    input:
+          vcfSnvs = snvsVcfGather.result
+          vcfIndels = indelsVcfGather.result
+	}
+
+    call injectFormatFields{
+	    input:
+		    vcf = combineCalls.vcf
+	}
+
     
     # Do not output the TSV and XML stats files; contents not needed
     output {
@@ -154,6 +166,28 @@ workflow strelkaSomatic {
 	File indelsVcf = indelsVcfGather.result
     }
 }
+
+
+
+task injectFormatFields{
+
+
+}
+
+
+task combineCalls {
+    input {
+	   File snvsVcf
+	   File indelsVcf
+	   String modules = "bcftools"
+	   Int jobMemory = 16
+	   Int threads = 4
+	   Int timeout = 4	   
+	
+	}
+
+}
+
 
 task configureAndRun {
 
@@ -317,7 +351,7 @@ task splitIntervals {
 	scatterCount: "Number of files to split the interval file into"
 	splitIntervalsExtraArgs: "Additional arguments for the 'gatk SplitIntervals' command"
 	memory: "Memory allocated for job"
-        overhead: "Memory overhead for running on a node"
+	overhead: "Memory overhead for running on a node"
 	timeout: "Hours before task timeout"
 	nonRefModules: "Environment modules other than the genome refence"
     }
