@@ -20,7 +20,7 @@ workflow strelkaSomatic {
       String reference
       String? bedFile
       Int? numChunk
-      String outputFileNamePrefix = "strelkaSomatic"
+      String outputFileNamePrefix
       String mode = "WG"
     }
 
@@ -63,7 +63,7 @@ workflow strelkaSomatic {
 	normalBam: "Input BAM file with normal data"
 	normalBai: "BAM index file for normal data"
 	reference: "Reference assembly id"
-        bedFile: "BED file designating regions to process"
+	bedFile: "BED file designating regions to process"
 	numChunk: "If BED file given, number of chunks in which to split each chromosome"
 	outputFileNamePrefix: "Prefix for output files"
 	mode: "WG (default), exome or targeted"
@@ -399,7 +399,7 @@ task vcfGather {
     input {
 	String modules = "gatk/4.1.2.0"
 	String gatk = "$GATK_ROOT/bin/gatk"
-        String refIndex
+    String refIndex
 	Array[File] vcfs
 	Int memory = 16
 	Int timeout = 12
