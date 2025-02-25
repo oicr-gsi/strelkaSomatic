@@ -214,9 +214,9 @@ task vcfCombine {
     command <<<
 	set -eo pipefail
 	
-	bcftools concat -a -o ~{outputFileNamePrefix}.strelka2.all.vcf ~{vcfSnvs} ~{vcfIndels}
-	bgzip ~{outputFileNamePrefix}.strelka2.all.vcf
-	tabix ~{outputFileNamePrefix}.strelka2.all.vcf.gz
+	bcftools concat -a -o ~{outputFileNamePrefix}.strelka2_all.vcf ~{vcfSnvs} ~{vcfIndels}
+	bgzip ~{outputFileNamePrefix}.strelka2_all.vcf
+	tabix ~{outputFileNamePrefix}.strelka2_all.vcf.gz
 
 	>>>
 	
