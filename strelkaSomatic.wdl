@@ -104,9 +104,9 @@ workflow strelkaSomatic {
     indelsVcf: {
         description: "VCF file with indels, .gz compressed",
         vidarr_label: "indelsVcf"
+     }
     }
-}
-    }
+   }
 
 	call splitIntervals {
 	    input:
@@ -140,19 +140,27 @@ workflow strelkaSomatic {
 	}
 	call vcfGather as snvsVcfGather {
 	    input:
-	    vcfs = configureAndRunParallel.snvsVcf,
-            refIndex = resources[reference].snvsVcfGather_refIndex
+		vcfs = configureAndRunParallel.snvsVcf,
+        refIndex = resources[reference].snvsVcfGather_refIndex,
+		outputFileNamePrefix = outputFileNamePrefix,
+		variantType = "snvs"
+
 	}
+
 	call vcfGather as indelsVcfGather {
 	    input:
 	    vcfs = configureAndRunParallel.indelsVcf,
-        refIndex = resources[reference].indelsVcfGather_refIndex
+        refIndex = resources[reference].indelsVcfGather_refIndex,
+		outputFileNamePrefix = outputFileNamePrefix,
+		variantType = "indels"
 	}
 	
-	call combineCalls {
+	call vcfCombine {
 	    input:
-          vcfSnvs = snvsVcfGather.result,
-		  vcfIndels = indelsVcfGather.result,
+          vcfSnvs = snvsVcfGather.vcf,
+          vcfSnvsIndex = snvsVcfGather.vcfIndex,
+		  vcfIndels = indelsVcfGather.vcf,
+		  vcfIndelsIndex = indelsVcfGather.vcfIndex,
 		  outputFileNamePrefix = outputFileNamePrefix
 	}
 
@@ -164,8 +172,10 @@ workflow strelkaSomatic {
     
     # Do not output the TSV and XML stats files; contents not needed
     output {
-	File snvsVcf = snvsVcfGather.result
-	File indelsVcf = indelsVcfGather.result
+	File snvsVcf = snvsVcfGather.vcf
+	File indelsVcf = indelsVcfGather.vcf
+	File allVcf = vcfCombine.vcf
+	File allVcfIndex = vcfCombine.vcfIndex
     }
 }
 
@@ -177,10 +187,12 @@ workflow strelkaSomatic {
 #}
 
 
-task combineCalls {
+task vcfCombine {
     input {
 	   File vcfSnvs
+	   File vcfSnvsIndex
 	   File vcfIndels
+	   File vcfIndelsIndex
 	   String modules = "bcftools/1.9 tabix/1.9"
 	   String outputFileNamePrefix
 	   Int jobMemory = 16
@@ -216,14 +228,14 @@ task combineCalls {
     }
 
     output {
-	File vcf = "~{outputFileNamePrefix}.strelka2.all.vcf.gz"
-	File vcfindex = "~{outputFileNamePrefix}.strelka2.all.vcf.gz.tbi"
+	File vcf = "~{outputFileNamePrefix}.strelka2_all.vcf.gz"
+	File vcfIndex = "~{outputFileNamePrefix}.strelka2_all.vcf.gz.tbi"
     }
     
 	meta {
 	output_meta: {
 	    vcf: "VCF file with snvs and indels, bgzip compressed",
-	    vcfindex: "tabix index"
+	    vcfIndex: "tabix index"
 	}
     }
 		
@@ -439,12 +451,14 @@ task splitIntervals {
 task vcfGather {
 
     input {
-	String modules = "gatk/4.1.2.0 tabix/1.9"
-	String gatk = "$GATK_ROOT/bin/gatk"
-    String refIndex
-	Array[File] vcfs
-	Int memory = 16
-	Int timeout = 12
+		String modules = "gatk/4.1.2.0 tabix/1.9"
+		String gatk = "$GATK_ROOT/bin/gatk"
+    	String refIndex
+		String outputFileNamePrefix
+		String variantType
+		Array[File] vcfs
+		Int memory = 16
+		Int timeout = 12
     }
 
     parameter_meta {
@@ -465,8 +479,7 @@ task vcfGather {
 	}
     }
 
-    String outputPrefix = basename(vcfs[0], ".vcf.gz")
-    String outputName = "~{outputPrefix}.vcf"
+    String outputName = "~{outputFileNamePrefix}.strelka2_~{variantType}.vcf"
 
     command <<<
 	set -eo pipefail
@@ -487,6 +500,7 @@ task vcfGather {
     }
 
     output {
-	File result = "~{outputName}.gz"
+	File vcf = "~{outputName}.gz"
+	File vcfIndex = "~{outputName}.gz.tbi"
     }
 }
