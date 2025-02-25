@@ -134,7 +134,8 @@ workflow strelkaSomatic {
 		refIndex = resources[reference].refIndex,
 		refModule = resources[reference].refModule,
 		regionsBed = interval,
-		outputFileNamePrefix = outputFileNamePrefix
+		outputFileNamePrefix = outputFileNamePrefix,
+		mode = mode
 	    }
 	}
 	call vcfGather as snvsVcfGather {
@@ -150,14 +151,15 @@ workflow strelkaSomatic {
 	
 	call combineCalls {
 	    input:
-          vcfSnvs = snvsVcfGather.result
-          vcfIndels = indelsVcfGather.result
+          vcfSnvs = snvsVcfGather.result,
+		  vcfIndels = indelsVcfGather.result,
+		  outputFileNamePrefix = outputFileNamePrefix
 	}
 
-    call injectFormatFields{
-	    input:
-		    vcf = combineCalls.vcf
-	}
+    #call injectFormatFields{
+	#    input:
+	#	    vcf = combineCalls.vcf
+	#}
 
     
     # Do not output the TSV and XML stats files; contents not needed
@@ -169,22 +171,62 @@ workflow strelkaSomatic {
 
 
 
-task injectFormatFields{
-
-
-}
+#task injectFormatFields{
+#
+#
+#}
 
 
 task combineCalls {
     input {
-	   File snvsVcf
-	   File indelsVcf
-	   String modules = "bcftools"
+	   File vcfSnvs
+	   File vcfIndels
+	   String modules = "bcftools/1.9 tabix/1.9"
+	   String outputFileNamePrefix
 	   Int jobMemory = 16
 	   Int threads = 4
 	   Int timeout = 4	   
 	
 	}
+
+    parameter_meta {
+	vcfSnvs: "vcf file with snvs"
+	vcfIndels: "vcf file with indels"
+	modules: "environment modules"
+	jobMemory: "Memory allocated for job"
+	timeout: "Hours before task timeout"
+	threads: "Number of threads for processing"
+    }
+
+	
+    command <<<
+	set -eo pipefail
+	
+	bcftools concat -a -o ~{outputFileNamePrefix}.strelka2.all.vcf ~{vcfSnvs} ~{vcfIndels}
+	bgzip ~{outputFileNamePrefix}.strelka2.all.vcf
+	tabix ~{outputFileNamePrefix}.strelka2.all.vcf.gz
+
+	>>>
+	
+    runtime {
+	modules: "~{modules}"
+	memory:  "~{jobMemory} GB"
+	cpu:     "~{threads}"
+	timeout: "~{timeout}"
+    }
+
+    output {
+	File vcf = "~{outputFileNamePrefix}.strelka2.all.vcf.gz"
+	File vcfindex = "~{outputFileNamePrefix}.strelka2.all.vcf.gz.tbi"
+    }
+    
+	meta {
+	output_meta: {
+	    vcf: "VCF file with snvs and indels, bgzip compressed",
+	    vcfindex: "tabix index"
+	}
+    }
+		
 
 }
 
@@ -237,7 +279,7 @@ task configureAndRun {
     String writeBed = if defined(regionsBed) then "grep -v \"^@\" ~{regionsBed} | bgzip > ~{bedName}" else ""
     String indexFeatureFile = if defined(regionsBed) then "tabix ~{bedName}" else ""
     String regionsBedArg = if defined(regionsBed) then "--callRegions ~{bedName}" else ""
-	String runMode = if mode == "exome" then "--exome" elsif mode == "targeted" then "--targeted" else ""
+	String runMode = if mode == "exome" then "--exome" else if mode == "targeted" then "--targeted" else ""
 
     # index files not explicitly used, but needed by configureStrelkaSomaticWorkflow.py
     # ie. tumorBai, normalBai, refIndex; tabix output on bedfile (if any)
@@ -397,7 +439,7 @@ task splitIntervals {
 task vcfGather {
 
     input {
-	String modules = "gatk/4.1.2.0"
+	String modules = "gatk/4.1.2.0 tabix/1.9"
 	String gatk = "$GATK_ROOT/bin/gatk"
     String refIndex
 	Array[File] vcfs
@@ -434,7 +476,8 @@ task vcfGather {
 	-R ~{refIndex} \
 	-O ~{outputName}
 
-	gzip ~{outputName}
+	bgzip ~{outputName}
+	tabix ~{outputName}.gz
     >>>
 
     runtime {
