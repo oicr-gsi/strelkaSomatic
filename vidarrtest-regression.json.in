@@ -86,7 +86,7 @@
 		},
 		"id": "SOMATIC",
 		"metadata": {
-			"strelkaSomatic.snvsVcf": {
+			"strelkaSomatic.vcfSnvs": {
 				"contents": [
 					{
 						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
@@ -94,14 +94,46 @@
 				],
 				"type": "ALL"
 			},
-			"strelkaSomatic.indelsVcf": {
-		                "contents": [
-                    			{
+			"strelkaSomatic.vcfIndels": {
+				"contents": [
+					{
 						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
 					}
-		                ],
-                		"type": "ALL"
-		        }
+				],
+			"type": "ALL"
+			},
+			"strelkaSomatic.vcfAll": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
+					}
+				],
+			"type": "ALL"
+			},
+			"strelkaSomatic.vcfAllIndex": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
+					}
+				],
+			"type": "ALL"
+			},
+			"strelkaSomatic.vcfExtended": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
+					}
+				],
+			"type": "ALL"
+			},
+			"strelkaSomatic.vcfExtendedIndex": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
+					}
+				],
+			"type": "ALL"
+			}
 		},
 		"validators": [
 			{
@@ -199,7 +231,7 @@
 		},
 		"id": "SOMATIC_HG38",
 		"metadata": {
-			"strelkaSomatic.snvsVcf": {
+			"strelkaSomatic.vcfSnvs": {
 				"contents": [
 					{
 						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
@@ -207,14 +239,46 @@
 				],
 				"type": "ALL"
 			},
-			"strelkaSomatic.indelsVcf": {
-		                "contents": [
-                    			{
+			"strelkaSomatic.vcfIndels": {
+				"contents": [
+					{
 						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
 					}
-		                ],
-                		"type": "ALL"
-		        }
+				],
+			"type": "ALL"
+			},
+			"strelkaSomatic.vcfAll": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
+					}
+				],
+			"type": "ALL"
+			},
+			"strelkaSomatic.vcfAllIndex": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
+					}
+				],
+			"type": "ALL"
+			},
+			"strelkaSomatic.vcfExtended": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
+					}
+				],
+			"type": "ALL"
+			},
+			"strelkaSomatic.vcfExtendedIndex": {
+				"contents": [
+					{
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
+					}
+				],
+			"type": "ALL"
+			}
 		},
 		"validators": [
 			{
