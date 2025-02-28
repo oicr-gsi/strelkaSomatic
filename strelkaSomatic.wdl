@@ -129,7 +129,7 @@ workflow strelkaSomatic {
          vcfExtendedIndex: {
             description: "tabix index for extended VCF",
             vidarr_label: "vcfExtendedIndex"
-        },
+        }
       }
    }
 
