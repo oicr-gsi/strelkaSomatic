@@ -92,7 +92,7 @@
 			"write_to_cache": false,
 			"read_from_cache": false
 		},
-		"id": "SOMATIC",
+		"id": "SOMATIC_HG19",
 		"metadata": {
 			"strelkaSomatic.vcfSnvs": {
 				"contents": [
