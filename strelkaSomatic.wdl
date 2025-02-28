@@ -208,7 +208,7 @@ task injectFields{
  
     command <<<
       set -eo pipefail
-      python3 /.mounts/labs/gsiprojects/gsi/gsiusers/lheisler/WDL/dev_strelkaSomatic/strelkaSomatic/scripts -i ~{vcfIn} -o ~{outputFileNamePrefix}.strelka2_all.extended.vcf
+      python3 /.mounts/labs/gsiprojects/gsi/gsiusers/lheisler/WDL/dev_strelkaSomatic/strelkaSomatic/scripts/strelka_add_gt_ad.py -i ~{vcfIn} -o ~{outputFileNamePrefix}.strelka2_all.extended.vcf
       bgzip ~{outputFileNamePrefix}.strelka2_all.extended.vcf
       tabix ~{outputFileNamePrefix}.strelka2_all.extended.vcf.gz
     >>>
