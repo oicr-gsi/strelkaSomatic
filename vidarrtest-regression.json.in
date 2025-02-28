@@ -26,9 +26,10 @@
                         "strelkaSomatic.splitIntervals.splitIntervalsExtraArgs": null,
                         "strelkaSomatic.splitIntervals.timeout": 72,
                         "strelkaSomatic.bedFile": null,
+			"strelkaSomatic.mode": null,
 			"strelkaSomatic.reference": "hg19",
 			"strelkaSomatic.numChunk": 4,
-                        "strelkaSomatic.outputFileNamePrefix": "strelkaSomatic",
+			"strelkaSomatic.outputFileNamePrefix": "regressionTest",
 			"strelkaSomatic.tumorBam": {
 				"contents": {
 					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam",
@@ -88,7 +89,7 @@
 			"strelkaSomatic.snvsVcf": {
 				"contents": [
 					{
-						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
 					}
 				],
 				"type": "ALL"
@@ -96,7 +97,7 @@
 			"strelkaSomatic.indelsVcf": {
 		                "contents": [
                     			{
-						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
 					}
 		                ],
                 		"type": "ALL"
@@ -106,7 +107,7 @@
 			{
 				"metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
 				"metrics_compare": "@CHECKOUT@/tests/compare.sh",
-				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation/SOMATIC.metrics",
+				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation/strelkaSomatic_HG19.metrics",
 				"type": "script"
 			}
 		]
@@ -138,9 +139,10 @@
                         "strelkaSomatic.splitIntervals.timeout": 72,
                         "strelkaSomatic.splitIntervals.overhead": 8,
                         "strelkaSomatic.bedFile": null,
+			"strelkaSomatic.mode": null,
 			"strelkaSomatic.reference": "hg38",
 			"strelkaSomatic.numChunk": 4,
-                        "strelkaSomatic.outputFileNamePrefix": "strelkaSomatic",
+                        "strelkaSomatic.outputFileNamePrefix": "regressionTest",
 			"strelkaSomatic.tumorBam": {
 				"contents": {
 					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/OCT_011394_Ov_P_PE_405_WG.chr22.bam",
@@ -200,7 +202,7 @@
 			"strelkaSomatic.snvsVcf": {
 				"contents": [
 					{
-						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
 					}
 				],
 				"type": "ALL"
@@ -208,7 +210,7 @@
 			"strelkaSomatic.indelsVcf": {
 		                "contents": [
                     			{
-						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strealkSomatic_AN_ID_@JENKINSID"
+						"outputDirectory": "@SCRATCH@/@DATE@_Workflow_strelkaSomatic_AN_ID_@JENKINSID"
 					}
 		                ],
                 		"type": "ALL"
@@ -218,7 +220,7 @@
 			{
 				"metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
 				"metrics_compare": "@CHECKOUT@/tests/compare.sh",
-				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation/SOMATIC_HG38.metrics",
+				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation/strelkaSomatic_HG38.metrics",
 				"type": "script"
 			}
 		]
