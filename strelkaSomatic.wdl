@@ -69,7 +69,15 @@ workflow strelkaSomatic {
        mode: "WG (default), exome or targeted"
     }
 
-
+    output {
+      File vcfSnvs = snvsVcfGather.vcf
+      File vcfIndels = indelsVcfGather.vcf
+      File vcfAll = vcfCombine.vcf
+      File vcfAllIndex = vcfCombine.vcfIndex
+      File vcfExtended = injectFields.vcf
+      File vcfExtendedIndex = injectFields.vcfIndex
+    }
+	
     meta {
        author: "Iain Bancarz, Lawrence Heisler"
        email: "ibancarz@oicr.on.ca, lheisler@oicr.on.ca"
@@ -98,14 +106,30 @@ workflow strelkaSomatic {
        ]
     
        output_meta: {
-         snvsVcf: {
+         vcfSnvs: {
             description: "VCF file with SNVs, .gz compressed",
-            vidarr_label: "snvsVcf"
+            vidarr_label: "vcfSnvs"
         },
-        indelsVcf: {
+        vcfIndels: {
             description: "VCF file with indels, .gz compressed",
-            vidarr_label: "indelsVcf"
-         }
+            vidarr_label: "vcfIndels"
+         },
+         vcfAll: {
+            description: "VCF file with SNVs and indels, .gz compressed",
+            vidarr_label: "vcfAll"
+        },
+         vcfAllIndex: {
+            description: "tabix index for VCF file with SNVs and indels",
+            vidarr_label: "vcfAllIndex"
+        },
+         vcfExtended: {
+            description: "extended VCF file with SNVs and indels, with added gt + ad fields .gz compressed",
+            vidarr_label: "vcfExtended"
+        },
+         vcfExtendedIndex: {
+            description: "tabix index for extended VCF",
+            vidarr_label: "vcfExtendedIndex"
+        },
       }
    }
 
@@ -176,14 +200,7 @@ workflow strelkaSomatic {
         outputFileNamePrefix = outputFileNamePrefix
      }
 
-    output {
-      File vcfSnvs = snvsVcfGather.vcf
-      File vcfIndels = indelsVcfGather.vcf
-      File vcfAll = vcfCombine.vcf
-      File vcfAllIndex = vcfCombine.vcfIndex
-      File vcfExtended = injectFields.vcf
-      File vcfExtendedIndext = injectFields.vcfIndex
-    }
+
 }
 
 
