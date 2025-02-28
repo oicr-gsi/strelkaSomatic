@@ -58,133 +58,180 @@ workflow strelkaSomatic {
     }   
  
     parameter_meta {
-	tumorBam: "Input BAM file with tumor data"
-	tumorBai: "BAM index file for tumor data"
-	normalBam: "Input BAM file with normal data"
-	normalBai: "BAM index file for normal data"
-	reference: "Reference assembly id"
-	bedFile: "BED file designating regions to process"
-	numChunk: "If BED file given, number of chunks in which to split each chromosome"
-	outputFileNamePrefix: "Prefix for output files"
-	mode: "WG (default), exome or targeted"
+       tumorBam: "Input BAM file with tumor data"
+       tumorBai: "BAM index file for tumor data"
+       normalBam: "Input BAM file with normal data"
+       normalBai: "BAM index file for normal data"
+       reference: "Reference assembly id"
+       bedFile: "BED file designating regions to process"
+       numChunk: "If BED file given, number of chunks in which to split each chromosome"
+       outputFileNamePrefix: "Prefix for output files"
+       mode: "WG (default), exome or targeted"
     }
 
 
     meta {
-	author: "Iain Bancarz, Lawrence Heisler"
-	email: "ibancarz@oicr.on.ca, lheisler@oicr.on.ca"
-	description: "Strelka variant caller in somatic mode"
-	dependencies: [
-	{
-	    name: "samtools/1.9",
-	    url: "https://github.com/samtools/samtools"
-	},
-	{
-	    name: "strelka/2.9.10",
-	    url: "https://github.com/Illumina/strelka/releases/tag/v2.9.10"
-	},
-	{
-	    name: "python/2.7",
-	    url: "https://www.python.org/downloads/release/python-2716/"
-	},
-	{
-	    name: "python/3.7",
-	    url: "https://www.python.org/downloads/release/python-378/"
-	},
-	{
-	    name: "gatk/4.1.6.0",
-	    url: "https://software.broadinstitute.org/gatk/download/index"
-	}
-	]
-    output_meta: {
-    snvsVcf: {
-        description: "VCF file with SNVs, .gz compressed",
-        vidarr_label: "snvsVcf"
-    },
-    indelsVcf: {
-        description: "VCF file with indels, .gz compressed",
-        vidarr_label: "indelsVcf"
-     }
-    }
+       author: "Iain Bancarz, Lawrence Heisler"
+       email: "ibancarz@oicr.on.ca, lheisler@oicr.on.ca"
+       description: "Strelka variant caller in somatic mode"
+       dependencies: [
+       {
+          name: "samtools/1.9",
+          url: "https://github.com/samtools/samtools"
+       },
+       {
+          name: "strelka/2.9.10",
+          url: "https://github.com/Illumina/strelka/releases/tag/v2.9.10"
+       },
+       {
+          name: "python/2.7",
+          url: "https://www.python.org/downloads/release/python-2716/"
+       },
+       {
+          name: "python/3.7",
+          url: "https://www.python.org/downloads/release/python-378/"
+       },
+       {
+          name: "gatk/4.1.6.0",
+          url: "https://software.broadinstitute.org/gatk/download/index"
+       }
+       ]
+    
+       output_meta: {
+         snvsVcf: {
+            description: "VCF file with SNVs, .gz compressed",
+            vidarr_label: "snvsVcf"
+        },
+        indelsVcf: {
+            description: "VCF file with indels, .gz compressed",
+            vidarr_label: "indelsVcf"
+         }
+      }
    }
 
-	call splitIntervals {
-	    input:
-	    refFasta = resources[reference].refFasta,
-	    refFai = resources[reference].refIndex,
-	    refDict = resources[reference].refDict,
-	    refModule = resources[reference].refModule,
-	    intervals = select_first([bedFile, resources[reference].bedFile]),
-            scatterCount = numChunk
-	}
-	Array[File] intervals = splitIntervals.intervalFiles
-	call convertIntervalsToBed {
-	    input:
-	    intervalFiles = intervals
-	}
-	Array[File] bedIntervals = convertIntervalsToBed.bedFiles
-	scatter(interval in bedIntervals) {
-	    call configureAndRun as configureAndRunParallel {
-		input:
-		tumorBam = tumorBam,
-		tumorBai = tumorBai,
-		normalBam = normalBam,
-		normalBai = normalBai,
-		refFasta = resources[reference].refFasta,
-		refIndex = resources[reference].refIndex,
-		refModule = resources[reference].refModule,
-		regionsBed = interval,
-		outputFileNamePrefix = outputFileNamePrefix,
-		mode = mode
-	    }
-	}
-	call vcfGather as snvsVcfGather {
-	    input:
-		vcfs = configureAndRunParallel.snvsVcf,
-        refIndex = resources[reference].snvsVcfGather_refIndex,
-		outputFileNamePrefix = outputFileNamePrefix,
-		variantType = "snvs"
+    call splitIntervals {
+       input:
+       refFasta = resources[reference].refFasta,
+       refFai = resources[reference].refIndex,
+       refDict = resources[reference].refDict,
+       refModule = resources[reference].refModule,
+       intervals = select_first([bedFile, resources[reference].bedFile]),
+       scatterCount = numChunk
+    }
 
-	}
-
-	call vcfGather as indelsVcfGather {
-	    input:
-	    vcfs = configureAndRunParallel.indelsVcf,
-        refIndex = resources[reference].indelsVcfGather_refIndex,
-		outputFileNamePrefix = outputFileNamePrefix,
-		variantType = "indels"
-	}
-	
-	call vcfCombine {
-	    input:
-          vcfSnvs = snvsVcfGather.vcf,
-          vcfSnvsIndex = snvsVcfGather.vcfIndex,
-		  vcfIndels = indelsVcfGather.vcf,
-		  vcfIndelsIndex = indelsVcfGather.vcfIndex,
-		  outputFileNamePrefix = outputFileNamePrefix
-	}
-
-    #call injectFormatFields{
-	#    input:
-	#	    vcf = combineCalls.vcf
-	#}
-
+    Array[File] intervals = splitIntervals.intervalFiles
     
-    # Do not output the TSV and XML stats files; contents not needed
+	call convertIntervalsToBed {
+        input:
+        intervalFiles = intervals
+    }
+
+    Array[File] bedIntervals = convertIntervalsToBed.bedFiles
+
+
+    scatter(interval in bedIntervals) {
+       call configureAndRun as configureAndRunParallel {
+        input:
+         tumorBam = tumorBam,
+         tumorBai = tumorBai,
+         normalBam = normalBam,
+         normalBai = normalBai,
+         refFasta = resources[reference].refFasta,
+         refIndex = resources[reference].refIndex,
+         refModule = resources[reference].refModule,
+         regionsBed = interval,
+         outputFileNamePrefix = outputFileNamePrefix,
+         mode = mode
+      }
+    }
+
+    call vcfGather as snvsVcfGather {
+      input:
+       vcfs = configureAndRunParallel.snvsVcf,
+       refIndex = resources[reference].snvsVcfGather_refIndex,
+       outputFileNamePrefix = outputFileNamePrefix,
+       variantType = "snvs"
+    }
+
+    call vcfGather as indelsVcfGather {
+     input:
+       vcfs = configureAndRunParallel.indelsVcf,
+       refIndex = resources[reference].indelsVcfGather_refIndex,
+       outputFileNamePrefix = outputFileNamePrefix,
+       variantType = "indels"
+     }
+	
+    call vcfCombine {
+      input:
+         vcfSnvs = snvsVcfGather.vcf,
+          vcfSnvsIndex = snvsVcfGather.vcfIndex,
+          vcfIndels = indelsVcfGather.vcf,
+          vcfIndelsIndex = indelsVcfGather.vcfIndex,
+          outputFileNamePrefix = outputFileNamePrefix
+    }
+
+    call injectFields{
+       input:
+        vcfIn = vcfCombine.vcf,
+        outputFileNamePrefix = outputFileNamePrefix
+     }
+
     output {
-	File snvsVcf = snvsVcfGather.vcf
-	File indelsVcf = indelsVcfGather.vcf
-	File allVcf = vcfCombine.vcf
-	File allVcfIndex = vcfCombine.vcfIndex
+      File vcfSnvs = snvsVcfGather.vcf
+      File vcfIndels = indelsVcfGather.vcf
+      File vcfAll = vcfCombine.vcf
+      File vcfAllIndex = vcfCombine.vcfIndex
+      File vcfExtended = injectFields.vcf
+      File vcfExtendedIndext = injectFields.vcfIndex
     }
 }
 
 
 
-#task injectFormatFields{
-#
-#
-#}
+task injectFields{
+    input {
+      File vcfIn
+      String outputFileNamePrefix
+      String modules = "varmerge-scripts/2.1 tabix/1.9"
+      Int jobMemory = 16
+      Int threads = 4
+      Int timeout = 4	   
+    }
+    parameter_meta {
+      vcfIn: "vcf file from strelka, missing gt and ad"
+      outputFileNamePrefix: "prefix for output file"
+      modules: "environment modules"
+      jobMemory: "Memory allocated for job"
+      timeout: "Hours before task timeout"
+      threads: "Number of threads for processing"
+    }
+ 
+    command <<<
+      set -eo pipefail
+      python3 /.mounts/labs/gsiprojects/gsi/gsiusers/lheisler/WDL/dev_strelkaSomatic/strelkaSomatic/scripts -i ~{vcfIn} -o ~{outputFileNamePrefix}.strelka2_all.extended.vcf
+      bgzip ~{outputFileNamePrefix}.strelka2_all.extended.vcf
+      tabix ~{outputFileNamePrefix}.strelka2_all.extended.vcf.gz
+    >>>
+	
+    runtime {
+      modules: "~{modules}"
+      memory:  "~{jobMemory} GB"
+      cpu:     "~{threads}"
+      timeout: "~{timeout}"
+    }
+
+    output {
+      File vcf = "~{outputFileNamePrefix}.strelka2_all.extended.vcf.gz"
+      File vcfIndex = "~{outputFileNamePrefix}.strelka2_all.extended.vcf.gz.tbi"
+    }
+    
+    meta {
+      output_meta: {
+        vcf: "extended VCF file with snvs and indels, bgzip compressed",
+        vcfIndex: "tabix index"
+      }	
+   }
+}
 
 
 task vcfCombine {
