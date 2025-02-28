@@ -69,69 +69,8 @@ workflow strelkaSomatic {
        mode: "WG (default), exome or targeted"
     }
 
-    output {
-      File vcfSnvs = snvsVcfGather.vcf
-      File vcfIndels = indelsVcfGather.vcf
-      File vcfAll = vcfCombine.vcf
-      File vcfAllIndex = vcfCombine.vcfIndex
-      File vcfExtended = injectFields.vcf
-      File vcfExtendedIndex = injectFields.vcfIndex
-    }
+
 	
-    meta {
-       author: "Iain Bancarz, Lawrence Heisler"
-       email: "ibancarz@oicr.on.ca, lheisler@oicr.on.ca"
-       description: "Strelka variant caller in somatic mode"
-       dependencies: [
-       {
-          name: "samtools/1.9",
-          url: "https://github.com/samtools/samtools"
-       },
-       {
-          name: "strelka/2.9.10",
-          url: "https://github.com/Illumina/strelka/releases/tag/v2.9.10"
-       },
-       {
-          name: "python/2.7",
-          url: "https://www.python.org/downloads/release/python-2716/"
-       },
-       {
-          name: "python/3.7",
-          url: "https://www.python.org/downloads/release/python-378/"
-       },
-       {
-          name: "gatk/4.1.6.0",
-          url: "https://software.broadinstitute.org/gatk/download/index"
-       }
-       ]
-    
-       output_meta: {
-         vcfSnvs: {
-            description: "VCF file with SNVs, .gz compressed",
-            vidarr_label: "vcfSnvs"
-        },
-        vcfIndels: {
-            description: "VCF file with indels, .gz compressed",
-            vidarr_label: "vcfIndels"
-         },
-         vcfAll: {
-            description: "VCF file with SNVs and indels, .gz compressed",
-            vidarr_label: "vcfAll"
-        },
-         vcfAllIndex: {
-            description: "tabix index for VCF file with SNVs and indels",
-            vidarr_label: "vcfAllIndex"
-        },
-         vcfExtended: {
-            description: "extended VCF file with SNVs and indels, with added gt + ad fields .gz compressed",
-            vidarr_label: "vcfExtended"
-        },
-         vcfExtendedIndex: {
-            description: "tabix index for extended VCF",
-            vidarr_label: "vcfExtendedIndex"
-        }
-      }
-   }
 
     call splitIntervals {
        input:
@@ -199,6 +138,71 @@ workflow strelkaSomatic {
         vcfIn = vcfCombine.vcf,
         outputFileNamePrefix = outputFileNamePrefix
      }
+
+
+    meta {
+       author: "Iain Bancarz, Lawrence Heisler"
+       email: "ibancarz@oicr.on.ca, lheisler@oicr.on.ca"
+       description: "Strelka variant caller in somatic mode"
+       dependencies: [
+       {
+          name: "samtools/1.9",
+          url: "https://github.com/samtools/samtools"
+       },
+       {
+          name: "strelka/2.9.10",
+          url: "https://github.com/Illumina/strelka/releases/tag/v2.9.10"
+       },
+       {
+          name: "python/2.7",
+          url: "https://www.python.org/downloads/release/python-2716/"
+       },
+       {
+          name: "python/3.7",
+          url: "https://www.python.org/downloads/release/python-378/"
+       },
+       {
+          name: "gatk/4.1.6.0",
+          url: "https://software.broadinstitute.org/gatk/download/index"
+       }
+       ]
+    
+       output_meta: {
+         vcfSnvs: {
+            description: "VCF file with SNVs, .gz compressed",
+            vidarr_label: "vcfSnvs"
+        },
+        vcfIndels: {
+            description: "VCF file with indels, .gz compressed",
+            vidarr_label: "vcfIndels"
+         },
+         vcfAll: {
+            description: "VCF file with SNVs and indels, .gz compressed",
+            vidarr_label: "vcfAll"
+        },
+         vcfAllIndex: {
+            description: "tabix index for VCF file with SNVs and indels",
+            vidarr_label: "vcfAllIndex"
+        },
+         vcfExtended: {
+            description: "extended VCF file with SNVs and indels, with added gt + ad fields .gz compressed",
+            vidarr_label: "vcfExtended"
+        },
+         vcfExtendedIndex: {
+            description: "tabix index for extended VCF",
+            vidarr_label: "vcfExtendedIndex"
+        }
+      }
+   }
+
+    output {
+      File vcfSnvs = snvsVcfGather.vcf
+      File vcfIndels = indelsVcfGather.vcf
+      File vcfAll = vcfCombine.vcf
+      File vcfAllIndex = vcfCombine.vcfIndex
+      File vcfExtended = injectFields.vcf
+      File vcfExtendedIndex = injectFields.vcfIndex
+    }
 
 
 }
