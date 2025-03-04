@@ -213,7 +213,7 @@ task injectFields{
     input {
       File vcfIn
       String outputFileNamePrefix
-      String modules = "varmerge-scripts/2.1 tabix/1.9"
+      String modules = "strelkasomatic-scripts/1.0 tabix/1.9"
       Int jobMemory = 16
       Int threads = 4
       Int timeout = 4	   
@@ -229,7 +229,7 @@ task injectFields{
  
     command <<<
       set -eo pipefail
-      python3 /.mounts/labs/gsiprojects/gsi/gsiusers/lheisler/WDL/dev_strelkaSomatic/strelkaSomatic/scripts/strelka_add_gt_ad.py -i ~{vcfIn} -o ~{outputFileNamePrefix}.strelka2_all.extended.vcf
+      python3 $STRELKASOMATIC_SCRIPTS_ROOT/bin/strelka_add_gt_ad.py -i ~{vcfIn} -o ~{outputFileNamePrefix}.strelka2_all.extended.vcf
       bgzip ~{outputFileNamePrefix}.strelka2_all.extended.vcf
       tabix ~{outputFileNamePrefix}.strelka2_all.extended.vcf.gz
     >>>
