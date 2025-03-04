@@ -162,8 +162,12 @@ workflow strelkaSomatic {
           url: "https://www.python.org/downloads/release/python-378/"
        },
        {
-          name: "gatk/4.1.6.0",
+          name: "gatk/4.1.2.0",
           url: "https://software.broadinstitute.org/gatk/download/index"
+       },
+       {
+          name: "bcftools/1.9",
+          url: "https://github.com/samtools/bcftools"
        }
        ]
     
