@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - modifications to output filenames to include the outputFileNamePrefix, this was not working properly
 - added a mode parameter, that gives ability to set --exome and --targeted flags
 - added task vcfCombine, which combines the snvs and indels into a single all output
-- added a python script (strelka_add_gt_ad.py) for generating missing gt and ad fields; this is based on prior work in the variantMerging workflow
+- added a python script (strelka_add_gt_ad.py) for generating missing gt and ad fields; this is based on prior work in the variantMerging workflow.  the python script is available through the strelkaSomatic-scripts module
 - added an injectFields task that runs the python script
 - added two additonal outputs, the _all.vcf.gz (combined snvs + indels) and _all.extended.vcf.gz (with gt + ad informaition)
 - extended regression tests to account for new outputs
