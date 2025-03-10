@@ -10,7 +10,8 @@ Strelka variant caller in somatic mode
 * [strelka 2.9.10](https://github.com/Illumina/strelka/releases/tag/v2.9.10)
 * [python 2.7](https://www.python.org/downloads/release/python-2716/)
 * [python 3.7](https://www.python.org/downloads/release/python-378/)
-* [gatk 4.1.6.0](https://software.broadinstitute.org/gatk/download/index)
+* [gatk 4.1.2.0](https://software.broadinstitute.org/gatk/download/index)
+* [bcftools 1.9](https://github.com/samtools/bcftools)
 
 
 ## Usage
@@ -30,6 +31,7 @@ Parameter|Value|Description
 `normalBam`|File|Input BAM file with normal data
 `normalBai`|File|BAM index file for normal data
 `reference`|String|Reference assembly id
+`outputFileNamePrefix`|String|Prefix for output files
 
 
 #### Optional workflow parameters:
@@ -37,7 +39,7 @@ Parameter|Value|Default|Description
 ---|---|---|---
 `bedFile`|String?|None|BED file designating regions to process
 `numChunk`|Int?|None|If BED file given, number of chunks in which to split each chromosome
-`outputFileNamePrefix`|String|"strelkaSomatic"|Prefix for output files
+`mode`|String|"WG"|WG (default), exome or targeted
 
 
 #### Optional task parameters:
@@ -56,33 +58,45 @@ Parameter|Value|Default|Description
 `configureAndRunParallel.jobMemory`|Int|16|Memory allocated for job
 `configureAndRunParallel.threads`|Int|4|Number of threads for processing
 `configureAndRunParallel.timeout`|Int|4|Hours before task timeout
-`snvsVcfGather.modules`|String|"gatk/4.1.2.0"|Environment module names and version to load (space separated) before command execution
+`snvsVcfGather.modules`|String|"gatk/4.1.2.0 tabix/1.9"|Environment module names and version to load (space separated) before command execution
 `snvsVcfGather.gatk`|String|"$GATK_ROOT/bin/gatk"|GATK to use
 `snvsVcfGather.memory`|Int|16|Memory allocated for job
 `snvsVcfGather.timeout`|Int|12|Hours before task timeout
-`indelsVcfGather.modules`|String|"gatk/4.1.2.0"|Environment module names and version to load (space separated) before command execution
+`indelsVcfGather.modules`|String|"gatk/4.1.2.0 tabix/1.9"|Environment module names and version to load (space separated) before command execution
 `indelsVcfGather.gatk`|String|"$GATK_ROOT/bin/gatk"|GATK to use
 `indelsVcfGather.memory`|Int|16|Memory allocated for job
 `indelsVcfGather.timeout`|Int|12|Hours before task timeout
+`vcfCombine.modules`|String|"bcftools/1.9 tabix/1.9"|environment modules
+`vcfCombine.jobMemory`|Int|16|Memory allocated for job
+`vcfCombine.threads`|Int|4|Number of threads for processing
+`vcfCombine.timeout`|Int|4|Hours before task timeout
+`injectFields.modules`|String|"strelkasomatic-scripts/1.0 tabix/1.9"|environment modules
+`injectFields.jobMemory`|Int|16|Memory allocated for job
+`injectFields.threads`|Int|4|Number of threads for processing
+`injectFields.timeout`|Int|4|Hours before task timeout
 
 
 ### Outputs
 
 Output | Type | Description | Labels
 ---|---|---|---
-`snvsVcf`|File|VCF file with SNVs, .gz compressed|vidarr_label: snvsVcf
-`indelsVcf`|File|VCF file with indels, .gz compressed|vidarr_label: indelsVcf
+`vcfSnvs`|File|VCF file with SNVs, .gz compressed|vidarr_label: vcfSnvs
+`vcfIndels`|File|VCF file with indels, .gz compressed|vidarr_label: vcfIndels
+`vcfAll`|File|VCF file with SNVs and indels, .gz compressed|vidarr_label: vcfAll
+`vcfAllIndex`|File|tabix index for VCF file with SNVs and indels|vidarr_label: vcfAllIndex
+`vcfExtended`|File|extended VCF file with SNVs and indels, with added gt + ad fields .gz compressed|vidarr_label: vcfExtended
+`vcfExtendedIndex`|File|tabix index for extended VCF|vidarr_label: vcfExtendedIndex
 
 
 ## Commands
  
-This section lists command(s) run by strelkaSomatic workflow
+ This section lists command(s) run by strelkaSomatic workflow
  
-* Running strelkaSomatic
+ * Running strelkaSomatic
  
-### Main task, configuring and running Strelka2
+ ### Main task, configuring and running Strelka2
  
-```
+ ```
  	set -eo pipefail
  
  	~{writeBed}
@@ -96,13 +110,13 @@ This section lists command(s) run by strelkaSomatic workflow
  	--runDir .
  
  	./runWorkflow.py -m local -j ~{threads}
-```
+ ```
  
-### Converting interval files to .bed
+ ### Converting interval files to .bed
  
-.bed files use 0-based index, we need to do a proper conversion of interval files 
+ .bed files use 0-based index, we need to do a proper conversion of interval files 
  
-```
+ ```
          python3 <<CODE
          import os, re
          intervalFiles = re.split(",", "~{sep=',' intervalFiles}")
@@ -117,15 +131,15 @@ This section lists command(s) run by strelkaSomatic workflow
                          fields[1] = str(int(fields[1]) - 1)
                          outFile.write("\t".join(fields)+"\n")
          CODE
-```
+ ```
  
-### Splitting intervals
+ ### Splitting intervals
  
-SplitIntervals is used to produce a requested number of files
-to make the analysis parallel, decreasing demand for resources per chunk
-and improving speed
-
-```
+ SplitIntervals is used to produce a requested number of files
+ to make the analysis parallel, decreasing demand for resources per chunk
+ and improving speed
+ 
+ ```
  	set -eo pipefail
  
  	mkdir interval-files
@@ -140,24 +154,57 @@ and improving speed
  	~{splitIntervalsExtraArgs}
  
  	cp interval-files/*.interval_list .
-```
+ ```
  
-### Combining vcf files after scatter
+ ### Combining vcf files after scatter
  
-This task uses GatherVcfs tools from GATK suite which needs the files to be ordered. 
-No overlap between covered features allowed.
+ This task uses GatherVcfs tools from GATK suite which needs the files to be ordered. 
+ No overlap between covered features allowed.
  
-```
-    set -eo pipefail
+ ```
+ 	set -eo pipefail
  
-    ~{gatk} GatherVcfs \
-    -I ~{sep=" -I " vcfs} \
-    -R ~{refFasta}
-    -O ~{outputName}
+ 	~{gatk} GatherVcfs \
+ 	-I ~{sep=" -I " vcfs} \
+ 	-R ~{refFasta}
+ 	-O ~{outputName}
  
-    gzip ~{outputName}
-```
-## Support
+ 	gzip ~{outputName}
+ ```
+ 
+ 
+ ### Merging the SNVs and Indels into a single file
+ 
+ Strelka will produce separate files for SNVs and Indels.  
+ Downstream processing sometimes needs these in the same file
+ The vcfCombine tasks combines the data and indexes the bgzipped output
+ 
+ ```
+ set -eo pipefail
+ 	
+ 	bcftools concat -a -o ~{outputFileNamePrefix}.strelka2_all.vcf ~{vcfSnvs} ~{vcfIndels}
+ 	bgzip ~{outputFileNamePrefix}.strelka2_all.vcf
+ 	tabix ~{outputFileNamePrefix}.strelka2_all.vcf.gz
+ ```
+ 
+ ### Add in GT and AD fields
+ 
+ Strelka does not utilize GT or AD as part of the sample fields.
+ These are useful to have and sometimes required for downstream processing.
+ Appropriate values can be generated in a variety of ways from existing information in the INFO and Sample FIELDS
+ A helper python script, scripts/strelka_add_gt_ad.py, is used to create and extended.vcf file in the injectFields task
+ 
+ ```
+ 	set -eo pipefail
+ 	python3 strelka_add_gt_ad.py -i ~{vcfIn} -o ~{outputFileNamePrefix}.strelka2_all.extended.vcf
+ 	bgzip ~{outputFileNamePrefix}.strelka2_all.extended.vcf
+ 	tabix ~{outputFileNamePrefix}.strelka2_all.extended.vcf.gz
+ ```
+ 
+ 
+ 
+ 
+ ## Support
 
 For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
 

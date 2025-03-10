@@ -72,12 +72,45 @@ This task uses GatherVcfs tools from GATK suite which needs the files to be orde
 No overlap between covered features allowed.
 
 ```
-   set -eo pipefail
+	set -eo pipefail
 
-   ~{gatk} GatherVcfs \
-   -I ~{sep=" -I " vcfs} \
-   -R ~{refFasta}
-   -O ~{outputName}
+	~{gatk} GatherVcfs \
+	-I ~{sep=" -I " vcfs} \
+	-R ~{refFasta}
+	-O ~{outputName}
 
-   gzip ~{outputName}
+	gzip ~{outputName}
 ```
+
+
+### Merging the SNVs and Indels into a single file
+
+Strelka will produce separate files for SNVs and Indels.  
+Downstream processing sometimes needs these in the same file
+The vcfCombine tasks combines the data and indexes the bgzipped output
+
+```
+set -eo pipefail
+	
+	bcftools concat -a -o ~{outputFileNamePrefix}.strelka2_all.vcf ~{vcfSnvs} ~{vcfIndels}
+	bgzip ~{outputFileNamePrefix}.strelka2_all.vcf
+	tabix ~{outputFileNamePrefix}.strelka2_all.vcf.gz
+```
+
+### Add in GT and AD fields
+
+Strelka does not utilize GT or AD as part of the sample fields.
+These are useful to have and sometimes required for downstream processing.
+Appropriate values can be generated in a variety of ways from existing information in the INFO and Sample FIELDS
+A helper python script, scripts/strelka_add_gt_ad.py, is used to create and extended.vcf file in the injectFields task
+
+```
+	set -eo pipefail
+	python3 strelka_add_gt_ad.py -i ~{vcfIn} -o ~{outputFileNamePrefix}.strelka2_all.extended.vcf
+	bgzip ~{outputFileNamePrefix}.strelka2_all.extended.vcf
+	tabix ~{outputFileNamePrefix}.strelka2_all.extended.vcf.gz
+```
+
+
+
+

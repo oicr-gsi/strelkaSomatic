@@ -5,5 +5,9 @@ set -o pipefail
 
 cd $1
 
-zcat somatic.indels.vcf.gz | egrep -v "^##(cmdline|fileDate|reference|startTime)" | md5sum
-zcat somatic.snvs.vcf.gz | egrep -v "^##(cmdline|fileDate|reference|startTime)" | md5sum
+zcat regressionTest.strelka2_snvs.vcf.gz         | egrep -v "^##(cmdline|fileDate|reference|startTime)" | md5sum
+zcat regressionTest.strelka2_indels.vcf.gz       | egrep -v "^##(cmdline|fileDate|reference|startTime)" | md5sum
+zcat regressionTest.strelka2_all.vcf.gz          | egrep -v "^##(cmdline|fileDate|reference|startTime|bcftools)" | md5sum
+zcat regressionTest.strelka2_all.extended.vcf.gz | egrep -v "^##(cmdline|fileDate|reference|startTime|bcftools)" | md5sum
+
+
