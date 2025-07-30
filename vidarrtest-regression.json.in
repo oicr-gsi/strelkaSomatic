@@ -40,7 +40,7 @@
 			"strelkaSomatic.outputFileNamePrefix": "regressionTest",
 			"strelkaSomatic.tumorBam": {
 				"contents": {
-					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam",
+					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/test_inputs/test_tumor.bam",
 					"externalIds": [
 						{
 							"id": "TEST",
@@ -52,7 +52,7 @@
 			},
 			"strelkaSomatic.tumorBai":  {
             			"contents": {
-		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_tumor.bam.bai",
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/test_inputs/test_tumor.bam.bai",
                 		    	"externalIds": [
 						{
 		                            		"id": "TEST",
@@ -64,7 +64,7 @@
 		        },
 	   		"strelkaSomatic.normalBam":  {
                 		"contents": {
-                    			"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam",
+                    			"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/test_inputs/test_normal.bam",
 			                "externalIds": [
                         			{
 			                            "id": "TEST",
@@ -76,7 +76,7 @@
             		},
 	    		"strelkaSomatic.normalBai":  {
                 		"contents": {
-		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/test_normal.bam.bai",
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/test_inputs/test_normal.bam.bai",
 			                "externalIds": [
                         			{
 			                            "id": "TEST",
@@ -147,7 +147,7 @@
 			{
 				"metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
 				"metrics_compare": "@CHECKOUT@/tests/compare.sh",
-				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation/strelkaSomatic_HG19.metrics",
+				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_metrics/workflow_test_01.metrics",
 				"type": "script"
 			}
 		]
@@ -193,7 +193,7 @@
 			"strelkaSomatic.outputFileNamePrefix": "regressionTest",
 			"strelkaSomatic.tumorBam": {
 				"contents": {
-					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/OCT_011394_Ov_P_PE_405_WG.chr22.bam",
+					"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/test_inputs/OCT_Test01.chr22.bam",
 					"externalIds": [
 						{
 							"id": "TEST",
@@ -205,7 +205,7 @@
 			},
 			"strelkaSomatic.tumorBai":  {
             			"contents": {
-		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/OCT_011394_Ov_P_PE_405_WG.chr22.bam.bai",
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/test_inputs/OCT_Test01.chr22.bam.bai",
                 		    	"externalIds": [
                         			{
 		                            		"id": "TEST",
@@ -217,7 +217,7 @@
 		        },
 	   		"strelkaSomatic.normalBam":  {
                 		"contents": {
-                    			"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/OCT_011394_Ly_R_PE_460_WG.chr22.bam",
+                    			"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/test_inputs/OCT_Test02.chr22.bam",
 			                "externalIds": [
                         			{
 			                            "id": "TEST",
@@ -229,7 +229,7 @@
             		},
 	    		"strelkaSomatic.normalBai":  {
                 		"contents": {
-		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/input_data/OCT_011394_Ly_R_PE_460_WG.chr22.bam.bai",
+		                	"configuration": "/.mounts/labs/gsi/testdata/strelkaSomatic/test_inputs/OCT_Test02.chr22.bam.bai",
 			                "externalIds": [
                         			{
 			                            "id": "TEST",
@@ -300,7 +300,7 @@
 			{
 				"metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
 				"metrics_compare": "@CHECKOUT@/tests/compare.sh",
-				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_expectation/strelkaSomatic_HG38.metrics",
+				"output_metrics": "/.mounts/labs/gsi/testdata/strelkaSomatic/output_metrics/workflow_test_02.metrics",
 				"type": "script"
 			}
 		]
