@@ -37,6 +37,15 @@ workflow strelkaSomatic {
         "refModule": "hg19/p13 samtools/1.9",
         "bedFile": "$HG19_ROOT/hg19.chrom.sizes.bed"
       },
+      "hg38_noAlt": {
+        "refDict": "$HG38_NOALT_ROOT/hg38_noAlt.dict",
+        "refIndex": "$HG38_NOALT_ROOT/hg38_noAlt.fa.fai",
+        "indelsVcfGather_refIndex": "$HG38_NOALT_ROOT/hg38_noAlt.fa.fai",
+        "snvsVcfGather_refIndex": "$HG38_NOALT_ROOT/hg38_noAlt.fa.fai",
+        "refFasta": "$HG38_NOALT_ROOT/hg38_noAlt.fa",
+        "refModule": "hg38-noalt/p12 samtools/1.9",
+        "bedFile": "$HG38_NOALT_ROOT/hg38_noAlt.chrom.sizes.bed"
+      },
       "hg38": {
         "refDict": "$HG38_ROOT/hg38_random.dict",
         "refIndex": "$HG38_ROOT/hg38_random.fa.fai",
